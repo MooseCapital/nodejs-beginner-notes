@@ -1,4 +1,7 @@
 /*
+    Project ideas: scrape the state lottery website and make a chart of how much it goes up,
+        vs how many people are playing, and when do more people join in!
+
 
     The "frontend" part of web development We have learned so far is made up of
       ->  HTML for markup, CSS for presentation, and JavaScript for scripting. Since we added react and can use other frameworks it seems complicated
@@ -22,6 +25,16 @@
         -> node has the ability javascript does not, it can read/write local files, create http connections, and listen to network request.
         -> asynchronous, event driven runtime. Means we do NOT try to predict when things will get done, we start multiple processes/functions
             ->when those are done, it goes on to the next step, nothing ever blocks the "stack" that would only let us do one thing at a time vs starting many
+
+    Package.json - we have experience with this, as each project needed to, npm i -y to download all packages
+        these pages show much information about each dependency, the module creators, and versions.. etc
+        https://github.com/nodejs/nodejs.dev/blob/aa4239e87a5adc992fdb709c20aebb5f6da77f86/content/learn/node-js-package-manager/package-json.en.md
+            npm init -y -> to create package.json
+        -> local packages are in our individual project node_modules folder where as -g global installs are in our
+            -> entire computer folder
+        -> in general we should use local packages because using global and updating could break other projects not ready for new version.
+
+
 
     Non blocking I/O - nodejs can run task in parallel, which eliminates the need for multi threaded.
 
@@ -101,6 +114,18 @@
       Path - we must be careful to have the right path to files, path overall is not too useful, it will simply put data we give
         it, into file path formats https://nodejs.dev/en/learn/nodejs-file-paths/
             const path = require('path');
+        -> in ever nodejs file we have access to __filename and __dirname
+            -> __file gives the entire directory and current file, while __dirname just gives the directory
+            -> the path module can take this and get certain parts out, such as
+            __filename -> /home/moose/Desktop/WebstormProjects/nodejs-beginner-notes/app.js
+            path.basename(__filename) -> app.js -> file name only
+            path.extname(__filename) -> .js -> file extension name
+
+            add paths together: path.join(__dirname, 'test')
+            ** -> path will NOT create files, this simply adds the path format together to input in fs modules
+                -> that will actually create the files, ALSO windows vs linux will use different slash \//\
+                -> by using path.join, it automates picking the slashes for us, so no issues!
+
 
       fs module - interacts with nodejs file system, no need to install, it's part of node.js core
             -> we can also run fs functions in a synchronous way to stop the thread from running, (we will probably never use)
@@ -125,7 +150,7 @@
 
             popular fs functions we will likely use
                 -> fs.stat() - gives data on the file such as creation time, byte size(kb), isfile() t/f, isDirectory()
-                ->
+                -> fs.rename() - rename files
 
             fs open() - we have fs.readFile() and fs.writeFile() that automatically opens the file for us, BUT if we want to keep using a file
                 -> we want to open the file ourselves to keep it open for performance and we can do more complicated editing to it.
@@ -137,6 +162,110 @@
 
             fs.writeFile() - we write a new file, or edit existing files, make sure to use the right flag to not overwrite file
                 if that is what we want https://nodejs.dev/en/learn/writing-files-with-nodejs/
+                we can either, overwite the entire file, append to the beginning or end. and open the file or reading/writing
+               * -> we can also use .appendFile() to simply add text to the end same as writeFile, but no flags required
+
+                    async function teststat() {
+                      const fileName = './files/test.txt';
+                      try {
+                        const data = await fs.writeFile(fileName, "hello world", {flag: "a"})
+                        console.log(data)
+                      } catch (err) {
+                        console.log(err);
+                      }
+                    }
+                    teststat();
+
+            fs.mkdir - create a folder, now add paths together easily with path.join
+                    fs.mkdir(path.join(__dirname,'test1'), {}, (err) => {
+                      if (err) {
+                          throw err
+                        console.log('folder created')
+                      }
+                    })
+
+            URL class - when we want to use a url link and edit it by inputting different parts of the path, search terms hashes.
+                or many other things.   https://nodejs.org/api/url.html#url_the_whatwg_url_api
+                -> URL is global, we don't need to require it
+                -> once the object has been created we can edit the properties on it directly or use template strings
+                    const myURL = new URL('https://example.org');
+                        myURL.pathname = '/a/b/c';
+                        myURL.search = '?d=e';
+                        myURL.hash = '#fgh';
+
+                        const pathname = '/a/b/c';
+                        const search = '?d=e';
+                        const hash = '#fgh';
+                    const myURL = new URL(`https://example.org${pathname}${search}${hash}`);
+                -> all we need to remember is, once created a url or getting user input search terms, we can extract any parts of
+                    -> that url from the object
+                -> instead of putting together a url with search params and paths, we could enter one, then break it apart,
+                        const myURL = new URL(`https://example.org?user=bob&age=30`);
+                            myURL.host -> example.org -> simply log myURL to get all parts of the link
+                -> add new search parameters to link
+                    myURL.searchParams.append('name', 'gary');
+
+        Event emitter - in javascript in the browser, we have event like onclick, but in node, it's a server with no interface. So we
+            create an event, then make that happen when we decide. https://github.com/nodejs/nodejs.dev/blob/aa4239e87a5adc992fdb709c20aebb5f6da77f86/content/learn/node-js-modules/node-module-events.en.md
+            const EventEmitter = require('events');
+            const customEmitterName = new EventEmitter();
+                -> we need to put our callback into a variable to make it be removed!!
+
+            const logFunctionForEvent = () => {
+                console.log("hello world" + param)
+            }
+            customEmitterName.on('customEventName', logFunctionForEvent)
+                -> emit fires the event, we can pass in arguments through this for the 2nd arg.
+            customEmitterName.emit("customEventName", "my name is bob") ->
+                -> we see "hello world my name is bob" in the console now
+
+            customEmitterName.eventNames() -> list all events on that emitter, current we have "customerEventName"
+            customEmitterName.getMaxListeners() -> default to 10, we set higher with customEmitterName.setMaxListeners(99);
+
+            -> to remove the event, its the opposite of how we created it with on.. off
+                customEmitterName.off('customEventName', logFunctionForEvent)
+
+            -> make event that is only ever called one time
+                customEmitterName.once('newEventName', () => {
+                    console.log('the pain of only getting to run once.. is so sad')
+                })
+
+            -> instead of .on() to add event, we can use prependListener() to make an event first in line,
+                -> new events get added to the end of the line
+
+            we saw how to remove a single listener above with .off(), now to remove every event of the same name..
+                -> customEmitterName.removeAllListeners('customEvent') -> we can still emit customEmitterName.emit('cat')
+                -> because this emitter is still active, and we can have multiple of the same event name. so cat event is still there
+                -> again .off() is simply alias for .removeListener() since we can have much different code for the same event name many times..
+                    -> this is why the cb must be in a variable to remove a specific event, shown above
+
+        os - get all information about computer system and software
+            os.cpus() - get array of all cpu cores and cpu model name
+            os.platform() - windows, linux..
+            os.freemem() - free memory/ram
+            os.totalmem() - total ram - free ram = used ram
+            os.uptime() - seconds system has been on
+
+        debugging - we can simply watch our file with nodemon and use console.log() for everything.. but eventually we get hundreds of logs
+            -> AND the most important part, the data can change after we have logged it, so we miss that error! this is where breakpoints come in
+
+            All we have to do to set it up is a few commands
+            1) node --inspect --watch filename.js -> we combined --watch and --inspect, it seems to be working
+            2) in our console, we get a link like 127.0.0.1:9229 -> put that into chrome search
+            3) go to chrome browser and inspect -> click the node green logo by the arrow near top bar.
+                -> this opens dedicated dev tools for node
+            4) we may not get normal console logs in chrome tool, so we may want to pop out our terminal that is watching logs as well, under
+                -> the nodejs inspector, while the inspector is for our breakpoints in webstorm
+
+            so tldr: run debug script, open chrome, we need to pop out debug tab because the chrome node debugger is slow to log our stuff
+            so we have the chrome window on the left side, and nodejs devtools on top right, and jetbrains debug logger on bottom right.
+
+
+    http -
+
+
+
+
 
 *  */
 
