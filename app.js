@@ -25,23 +25,6 @@ console.log('hello')
 
 
 
-// fs.readFile('./files/index.html')
-
-
-/* async function indexRead(filename) {
-  const fileName = `./files/${filename}`;
-  try {
-    const data = await fs.readFile(fileName, 'utf8');
-    console.log(data)
-    return data
-    //const content = '';
-    //await fs.writeFile(fileName, content);
-  } catch (err) {
-    console.log(err);
-  }
-} */
-
-
 
 
 
