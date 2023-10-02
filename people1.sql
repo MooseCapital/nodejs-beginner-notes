@@ -1,4 +1,6 @@
+
 create table people (
+    id INTEGER PRIMARY KEY AUTOINCREMENT ,
 	first_name VARCHAR(50),
 	last_name VARCHAR(50),
 	age INT,
@@ -7,6 +9,7 @@ create table people (
 	gender VARCHAR(50),
 	race VARCHAR(50)
 );
+
 insert into people (first_name, last_name, age, country, favorite_color, gender, race) values ('Kaleena', 'Dignon', 36, 'Pakistan', 'red', 'Female', 'American Indian');
 insert into people (first_name, last_name, age, country, favorite_color, gender, race) values ('Ruthanne', 'Hagstone', 67, 'Cuba', 'blue', 'Female', 'Chickasaw');
 insert into people (first_name, last_name, age, country, favorite_color, gender, race) values ('Giffie', 'Rayer', 50, 'Indonesia', 'red', 'Male', 'Bolivian');
@@ -110,7 +113,7 @@ insert into people (first_name, last_name, age, country, favorite_color, gender,
 
 
 
-SELECT COUNT(*) FROM people WHERE favorite_color = 'blue';
+SELECT * from people
 
 
 

@@ -28,14 +28,90 @@
             npm install objection knex
 
 
-    SQL CODE:
-
+SQL CODE:
+      TABLE creating / modifying
         create table - Note instead of making an id ourselves, we can set it to auto increment, it means id starts at 1,
             then counts when new rows get added, 1,2,3..
 
                 CREATE TABLE people (id PRIMARY KEY, name varchar(255), age int)
                 CREATE TABLE people (id PRIMARY KEY AUTO_INCREMENT, name varchar(255), age int)
 
+        Table data types -
+            BLOB - binary data type
+            INTEGER - number
+            NUMERIC - date/time in standardized format, YYYY-MM-DD
+            REAL - decimal point number
+            TEXT - string text
+            UUID - type in PostgreSQL for uuids
+            NOT NULL - will give error if we don't input value or put in null when inserting, this helps if cell can NOT be blank
+            UNIQUE - when we want to make sure any value in column is truly unique, like email address, ssn.. etc
+
+            PRIMARY KEY - constraint uniquely identifies each record in a table. no null values
+                -> inserting in table could look like, ID int NOT NULL PRIMARY KEY,
+            FOREIGN KEY - field in 1 table that references a PRIMARY KEY in another table
+                FOREIGN KEY (PersonID) REFERENCES Persons(PersonID)
+                -> once we make a foreign key reference to another tables primary key, when we insert a value,
+                    -> it will not let us insert an id that is NOT included in the other table as its primary key
+                    -> this is a constraint.
+
+        insert new row into table -
+             INSERT INTO table_name (id_num, 'bob', 33, 'cool')
+
+            -> we do not need to say the column names, but the values must be in the correct order, we can also say the columns though, we are repeating ourselves.
+                INSERT INTO table_name (column_id, name, age , isLame) VALUES (10, 'gary', 34, 'lame')
+
+            -> when inserting with AUTO_INCREMENT, we don't need to name the primary key column if using column names to insert.
+                INSERT INTO table_name (name, age , isLame) VALUES (10, 'gary', 34, 'lame')
+
+            -> when inserting, but we DONT have data for all columns, we can just leave it out when naming columns or not. the empty cells simply say "NULL"
+               -> see how it's auto incrementing ID, and we left out the 'lame' column value
+
+                INSERT INTO table_name (name, age) VALUES ('gary', 34)
+
+            -> insert multiple rows at once, if we have our format right, no need to retype INSERT INTO again.. simply repeat the values data, separate by comma,
+                -> then end with semicolon like always.
+
+                INSERT INTO table_name (name, age , isLame)
+                VALUES
+                    ( 'gary', 34, 'lame'),
+                    ( 'bob', 44, 'cool'),
+                    ( 'sara', 24, 'lame');
+
+
+
+        Table db design - determine if we have 1 to 1 relationship, 1 to many, many to many etc..
+            we use multiple tables when a cell might need more than 1 value, such as the imdb example in cs50.
+            an actor/person has 1 id, if we put shows as a column then we only have room for 1 tv show/person.
+            -> but if we make shows it's own table, we can have the show info and show id
+            -> then in another star table, match show id to many person id, this way, we're not repeating show info.
+            -> of course, in stars table, we are repeating tv shows id, to many person_id, since many people are in the show to match with it.
+
+        id random number - for our primary key every row must be unique, if we autoincrement, then we get 1,2,3.. but we don't want the first users to see in
+            the pages route that they are user number 5.. oof. so we generate big numbers with almost infinite combinations using UUID.v4()
+            "we have X users, store Y documents and this specific medical function has been called Z number of times".
+            You use random IDs (normally UUIDs) to avoid leaking data you don't intend to share publicly.
+            UUIDv4 - npm i uuid   https://www.npmjs.com/package/uuid
+            https://www.cockroachlabs.com/blog/what-is-a-uuid/
+            -> when connecting multiple tables, those ids when AUTOINCREMENT will overlap.. not good
+
+
+        CHAR vs VARCHAR - the type of data into the column for sql, Character vs variable character
+            CHAR - fixed length, if we have CHAR(10) and "mike" goes in there, it uses 6 empty bytes of space.. oof.
+                storage size is of length we set in CHAR(#)
+            VARCHAR - variable length, if we have VARCHAR(10) and "bob" goes inserted, it uses only 3 bytes of space.
+                storage size is the actual length of string inputted.
+
+                use CHAR when we expect the same length every time like preset form options. such as state codes, always 2: CA,AL,TX..
+                VARCHAR without () parenthesis will give us 8000 byte max for data.
+
+                we can NOT simply always use VARCHAR since it uses more cpu cycles, it will slow us down more than CHAR when we can use it
+                    -> this means the database must check the data's length as well as content when searching. vs CHAR() telling the db its length.
+
+
+
+
+
+    Column creating / modifying
 
         SELECT columns - SELECT * -> star/asterisk means all columns, basically select the entire db
                 SELECT * FROM table_name
@@ -70,48 +146,116 @@
             SELECT COUNT(DISTINCT(country)) AS countryCount FROM people
 
         WHERE - lets us filter data WHERE a condition is true, Distinct only got unique values, now we PICK what value to filter by!
-        LIKE - equal sign alternative, 1 LIKE 1 -> true
-        ORDER BY - sorting
+        LIKE - instead of searching exactly, we can search for starting letter etc.. like regex pattern in javascript
+        ORDER BY - sorting use, ORDER BY (column_name) ASC if going to biggest, or DESC if starting big to smallest.
         LIMIT - limit number of rows we get back, if its large amount.. get smaller amount
         GROUP BY -
 
-        WHERE - filter values specifically, put in single quotes for comparing text values.
+        WHERE - filter values specifically, put in single quotes for comparing text values. Operators used with 'WHERE' -> =, >, <, >=, <= ,
+            <> means not equal, some sql versions use js standard !=   , BETWEEN -> between a certain range, between seems to simplify using a combination > and <
+            LIKE -> search for a pattern,  IN ->to specify multiple possible values for a column
             SELECT * FROM people WHERE favorite_color = 'blue'; -> we get every row that has 'blue' for favorite color,  26 rows listed
             SELECT COUNT(*) FROM people WHERE favorite_color = 'blue'; -> count how many rows count 'blue' for favorite color - 26
 
+        BETWEEN - gives values within a range
+            SELECT column_name(s) FROM table_name WHERE column_name BETWEEN value1 AND value2;
+            -> example query, we can also use NOT, so it's outside the range, not inside it.. or between it
+                SELECT * FROM Products WHERE Price NOT BETWEEN 10 AND 20;
+            -> we combine a between query and 'IN' for multiple options, ages 20-40 while checking for favorite colors that aren't purple or blue.
+                SELECT * FROM people WHERE age BETWEEN 20 AND 40 AND favorite_color NOT IN ('purple', 'blue');
+
+
+        IN - lets us select multiple values in a WHERE condition, so we have more options easily
+            -> it's a shorthand for 'or' operator,
+                SELECT * FROM people WHERE country = 'Russia' OR country = 'China';
+                SELECT * FROM people WHERE country IN ('Russia', 'China');
+            -> notice we are typing out all the options inside IN.. we can make this even simpler using sub-query, query inside query
+                -> notice we are checking the orders table if our customer is in there, to see if they have ordered. works with multiple tables only.
+                    -> to check if our data is somewhere else,
+                SELECT * FROM Customers WHERE CustomerID IN (SELECT CustomerID FROM Orders);
 
 
 
-        insert new row into table -
-             INSERT INTO table_name (id_num, 'bob', 33, 'cool')
+        LIKE - pattern for searching not exact values, such as city names starting with B. https://www.w3schools.com/sql/sql_like.asp
+            -> use in combination with wildcards for more regex like patterns https://www.w3schools.com/sql/sql_wildcards.asp
+            -> percent % sign can represent, 0,1, or more character,
+            -> _ underscore sign can represent only one character
 
-            -> we do not need to say the column names, but the values must be in the correct order, we can also say the columns though, we are repeating ourselves.
-                INSERT INTO table_name (column_id, name, age , isLame) VALUES (10, 'gary', 34, 'lame')
-
-            -> when inserting with AUTO_INCREMENT, we don't need to name the primary key column if using column names to insert.
-                INSERT INTO table_name (name, age , isLame) VALUES (10, 'gary', 34, 'lame')
-
-            -> when inserting, but we DONT have data for all columns, we can just leave it out when naming columns or not. the empty cells simply say "NULL"
-               -> see how it's auto incrementing ID, and we left out the 'lame' column value
-
-                INSERT INTO table_name (name, age) VALUES ('gary', 34)
-
-            -> insert multiple rows at once, if we have our format right, no need to retype INSERT INTO again.. simply repeat the values data, separate by comma,
-                -> then end with semicolon like always.
-
-                INSERT INTO table_name (name, age , isLame)
-                VALUES
-                    ( 'gary', 34, 'lame'),
-                    ( 'bob', 44, 'cool'),
-                    ( 'sara', 24, 'lame');
+            -> this simply searches for country starting with C, no defined length
+                SELECT * FROM people WHERE country LIKE 'C%';
+            -> underscore can define a max length for us, here we don't search exact names, but first names with 4 letters only
+                SELECT * FROM people WHERE first_name LIKE '____';
 
 
 
+        GROUP BY - we select multiple columns and group it by one, earlier if we SELECT COUNT(color) -> we simply get 1 columns with counts of all colors
+            -> this data does NOT tell us much because we get the counts but I don't know which colors have the counts, so i need another column to tell me
+                -> we must GROUP BY the same column we select to get relevant data, or else were shown data that is not the same column we select, not useful..
+                SELECT gender, count(*) FROM people GROUP BY gender;
+
+        ORDER BY - sort a list
+            -> we get 2 columns, gender and the count of each in 2nd column, then order least to greatest count.
+            -> we could also order by gender, going from a-z, but the numbers are now no longer least to greatest..
+            SELECT gender, count(*) FROM people GROUP BY gender ORDER BY count(*);
+
+        LIMIT - we saw how to sort columns above with order by, now LIMIT simply limits the amount of results back
+            -> we would likely want to sort before limiting such as, big to small, now limit 1 gives us the row with highest number in something.. etc
+            -> not DESC order and LIMIT 1, top gender counted
+            SELECT gender, count(*) FROM people GROUP BY gender ORDER BY count(*) DESC LIMIT 1;
+
+        UPDATE - almost what it says it is. we update values. **NOTE this is destructive we are replacing values in the DB, we should have backups
+            UPDATE table_name SET column 1 = value, column2 = value, WHERE condition = otherValue;
+            -> basically select rows where certain condition, now overwrite certain column data on these selected rows, its a "find and replace"
+            -> if we omit the WHERE clause, all records will be updated!
+            **ALWAYS BACK UP data since we can override data if we forget WHERE condition!
+
+            -> we set all favorite_color to purple, on only female genders * we typed 'female' first, case-sensitive always!
+            UPDATE people SET favorite_color = 'purple' WHERE gender = 'Female';
+
+        DELETE - delete records like UPDATE updates them.
+            -> this deletes ALL records where condition is true, if condition is omitted, ALL records will be deleted
+                -> **always make backups, usually you will probably not delete a users row, but simply updated some "isDeleted" column to true/false
+            DELETE FROM table_name WHERE condition;
+            DELETE FROM people WHERE id = 1;
+
+            Delete entire table - DROP TABLE table_name
+
+        AND - just like the && javascript, both checks 2 statements now instead of only one in where
+            -> we combine 2 conditions with where
+                SELECT * FROM people WHERE favorite_color = 'red' AND gender = 'Female';
+            -> we now combine 3 conditions with WHERE and multiple operators
+                SELECT * FROM people WHERE favorite_color = 'red' AND gender = 'Female' AND age > 50;
+
+        Table db design - determine if we have 1 to 1 relationship, 1 to many, many to many etc..
+            we use multiple tables when a cell might need more than 1 value, such as the imdb example in cs50.
+            an actor/person has 1 id, if we put shows as a column then we only have room for 1 tv show/person.
+            -> but if we make shows it's own table, we can have the show info and show id
+            -> then in another star table, match show id to many person id, this way, we're not repeating show info.
+            -> of course, in stars table, we are repeating tv shows id, to many person_id, since many people are in the show to match with it.
 
 
 
 
+        id random number - for our primary key every row must be unique, if we autoincrement, then we get 1,2,3.. but we don't want the first users to see in
+            the pages route that they are user number 5.. oof. so we generate big numbers with almost infinite combinations using UUID.v4()
+            "we have X users, store Y documents and this specific medical function has been called Z number of times".
+            You use random IDs (normally UUIDs) to avoid leaking data you don't intend to share publicly.
+        UUIDv4 - npm i uuid   https://www.npmjs.com/package/uuid
+            https://www.cockroachlabs.com/blog/what-is-a-uuid/
+            -> when connecting multiple tables, those ids when AUTOINCREMENT will overlap.. not good
 
+
+        CHAR vs VARCHAR - the type of data into the column for sql, Character vs variable character
+            CHAR - fixed length, if we have CHAR(10) and "mike" goes in there, it uses 6 empty bytes of space.. oof.
+                storage size is of length we set in CHAR(#)
+            VARCHAR - variable length, if we have VARCHAR(10) and "bob" goes inserted, it uses only 3 bytes of space.
+                storage size is the actual length of string inputted.
+
+                use CHAR when we expect the same length every time like preset form options. such as state codes, always 2: CA,AL,TX..
+                VARCHAR without () parenthesis will give us 8000 byte max for data.
+
+                we can NOT simply always use VARCHAR since it uses more cpu cycles, it will slow us down more than CHAR when we can use it
+                    -> this means the database must check the data's length as well as content when searching. vs CHAR() telling the db its length.
 
 
 

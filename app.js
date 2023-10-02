@@ -8,6 +8,7 @@ const EventEmitter = require('events');
 const os = require("os");
 const http = require("http");
 const {readHTML} = require("./paths");
+const uuid = require("uuid");
 const eventEmitter = new EventEmitter();
 
 /*
@@ -21,9 +22,8 @@ axios.get('https://jsonplaceholder.typicode.com/posts/1')
               });
 
 */
-console.log('hello')
 
-
+console.log(uuid.v4())
 
 
 
