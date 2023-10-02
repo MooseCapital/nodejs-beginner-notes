@@ -85,6 +85,30 @@ SQL CODE:
             -> but if we make shows it's own table, we can have the show info and show id
             -> then in another star table, match show id to many person id, this way, we're not repeating show info.
             -> of course, in stars table, we are repeating tv shows id, to many person_id, since many people are in the show to match with it.
+                -> doing this, the stars table has 2 columns, it simply exist to match show_id to person_id,
+
+            the teacher now uses sub queries from multiple databases, since we must query data from multiple dbs, we search all comedy id's
+                -> then must search those show table by show_id's to get the shows title column for all comedies.
+                    SELECT title from shows where id IN(SELECT show_id FROM genres WHERE genre = 'comedy')
+                -> good practice is to never type in any id's or anything, we should always be querying/searching, not hard coding values in a search
+
+                -> 1) we perform 3 query's in 1 to match foreign keys in tables. That finally gets us a column with text that is NOT an id. woo
+                    SELECT title FROM shows WHERE id IN (SELECT show_id FROM stars WHERE person_id = (SELECT id FROM people WHERE name = 'Steve Carell'))
+
+                -> 2) we can repeat the query above in another way, using JOINS basically joining, people id, stars id, show id columns
+                    -> Implicit way, tell sql join and it does, next is explicit, where we match the data exactly, not JOIN for us..
+                        SELECT title FROM people
+                            INNER JOIN stars ON people.id = stars.person_id
+                            INNER JOIN shows on stars.show_id = shows.id
+                            WHERE name = 'Steve Carel';
+
+                -> 3) Explicit way, we tell sql exactly where to select title column, and to match id = other tables id
+                        -> we will mostly be using INNER JOIN rather than this explicit way, because JOINS are easier to read when the query gets very long
+                            SELECT title from people, stars, shows
+                                WHERE people.id = stars.person_id
+                                AND stars.show_id = shows.id
+                                AND name = 'Steve Carell';
+
 
         id random number - for our primary key every row must be unique, if we autoincrement, then we get 1,2,3.. but we don't want the first users to see in
             the pages route that they are user number 5.. oof. so we generate big numbers with almost infinite combinations using UUID.v4()
@@ -226,23 +250,26 @@ SQL CODE:
             -> we now combine 3 conditions with WHERE and multiple operators
                 SELECT * FROM people WHERE favorite_color = 'red' AND gender = 'Female' AND age > 50;
 
-        Table db design - determine if we have 1 to 1 relationship, 1 to many, many to many etc..
-            we use multiple tables when a cell might need more than 1 value, such as the imdb example in cs50.
-            an actor/person has 1 id, if we put shows as a column then we only have room for 1 tv show/person.
-            -> but if we make shows it's own table, we can have the show info and show id
-            -> then in another star table, match show id to many person id, this way, we're not repeating show info.
-            -> of course, in stars table, we are repeating tv shows id, to many person_id, since many people are in the show to match with it.
 
+        JOIN - combine rows from 2 or more columns based on data between them, likely the primary key/ foreign key that matches and other stuff
+              -> here we combine data with the same id, but we select everything, so there are 2 columns showing same id, peoplehalf1.id & peoplehalf2.id
+                    SELECT * FROM peoplehalf1 JOIN peoplehalf2 on peoplehalf1.id = peoplehalf2.id;
+              -> combine same data now both tables are joined, filter it down by shirt size
+                    SELECT * FROM peoplehalf1 JOIN peoplehalf2 on peoplehalf1.id = peoplehalf2.id WHERE shirt_size = 'M';
+              -> make a join that might need 2 conditions, see buyers price range and homes for sale table..
+                    -> we've joined 2 tables by BETWEEN condition, not id = id,
+                    -> we also used table alias's to save alot of typing. write the alias letter after JOIN and FROM table name
+                    SELECT h.price, h.id FROM buyers b JOIN houses h ON h.price BETWEEN b.min_price AND b.max_price
 
+              -> column alias, since inner JOINS will give us multiple id columns when matching by id, we either select * simply,
+                -> or select each individual column we want. we select each column which is longer, and also use alias to reduce typing.
+                -> we exclude the duplicate 2nd id, then rename table 1 id to simply 'id' and not peoplehalf1.id
+                     SELECT p1.id AS id, p1.first_name, p1.gender, p1.country, p1.race,
+                            p2.color, p2.icecream, p2.shirt_size, p2.car
+                         FROM peoplehalf1 p1
+                         JOIN peoplehalf2 p2
+                            ON p1.id = p2.id;
 
-
-        id random number - for our primary key every row must be unique, if we autoincrement, then we get 1,2,3.. but we don't want the first users to see in
-            the pages route that they are user number 5.. oof. so we generate big numbers with almost infinite combinations using UUID.v4()
-            "we have X users, store Y documents and this specific medical function has been called Z number of times".
-            You use random IDs (normally UUIDs) to avoid leaking data you don't intend to share publicly.
-        UUIDv4 - npm i uuid   https://www.npmjs.com/package/uuid
-            https://www.cockroachlabs.com/blog/what-is-a-uuid/
-            -> when connecting multiple tables, those ids when AUTOINCREMENT will overlap.. not good
 
 
         CHAR vs VARCHAR - the type of data into the column for sql, Character vs variable character
