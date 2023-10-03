@@ -2,7 +2,7 @@
 create table peoplehalf1 (
 	id INT NOT NULL ,
 	first_name VARCHAR(50),
-	gender VARCHAR(9),
+	gender VARCHAR(90),
 	country VARCHAR(50),
 	race VARCHAR(50),
 	PRIMARY KEY(id)
@@ -209,3 +209,4 @@ insert into peoplehalf1 (id, first_name, gender, country, race) values (198, 'Ca
 insert into peoplehalf1 (id, first_name, gender, country, race) values (199, 'Lavina', 'Female', 'Indonesia', 'Houma');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (200, 'Gibb', 'Male', 'China', 'Pima');
 
+SELECT first_name FROM peoplehalf1 WHERE EXISTS (SELECT first_name FROM peoplehalf1 WHERE first_name = 'Toddie');

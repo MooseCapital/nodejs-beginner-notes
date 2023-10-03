@@ -6,7 +6,7 @@ create table peoplehalf2 (
 	icecream VARCHAR(9),
 	shirt_size VARCHAR(50),
 	car VARCHAR(50),
-	FOREIGN KEY (id) REFERENCES peoplehalf1 (id)
+	PRIMARY KEY (id)
 );
 insert into peoplehalf2 (id, color, icecream, shirt_size, car) values (1, 'Green', 'pecan', 'XS', 'GMC');
 insert into peoplehalf2 (id, color, icecream, shirt_size, car) values (2, 'Crimson', 'pecan', 'M', 'Volkswagen');

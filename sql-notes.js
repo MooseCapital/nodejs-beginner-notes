@@ -42,17 +42,20 @@ SQL CODE:
             NUMERIC - date/time in standardized format, YYYY-MM-DD
             REAL - decimal point number
             TEXT - string text
-            UUID - type in PostgreSQL for uuids
+            UUID - type in PostgreSQL for uuids - https://www.cockroachlabs.com/docs/stable/uuid#create-a-table-with-auto-generated-unique-row-ids
             NOT NULL - will give error if we don't input value or put in null when inserting, this helps if cell can NOT be blank
             UNIQUE - when we want to make sure any value in column is truly unique, like email address, ssn.. etc
 
             PRIMARY KEY - constraint uniquely identifies each record in a table. no null values
                 -> inserting in table could look like, ID int NOT NULL PRIMARY KEY,
+
             FOREIGN KEY - field in 1 table that references a PRIMARY KEY in another table
                 FOREIGN KEY (PersonID) REFERENCES Persons(PersonID)
-                -> once we make a foreign key reference to another tables primary key, when we insert a value,
-                    -> it will not let us insert an id that is NOT included in the other table as its primary key
-                    -> this is a constraint.
+                ->Using a foreign key constraint helps us ensure that only data that can be linked to the
+                    -> referenced table can be entered into our database.
+                -> if we do NOT use foreign keys and need matching tables to connect data. we could mistype text and it would be inserted
+                    ->where a foreign key will make sure the data is EXACTLY in the other table to insert
+
 
         insert new row into table -
              INSERT INTO table_name (id_num, 'bob', 33, 'cool')
@@ -132,7 +135,8 @@ SQL CODE:
                     -> this means the database must check the data's length as well as content when searching. vs CHAR() telling the db its length.
 
 
-
+        TABLE - add, rename, update, delete/drop https://www.w3schools.com/sql/sql_alter.asp
+                ALTER TABLE table_name ADD column_name datatype;
 
 
     Column creating / modifying
@@ -227,8 +231,8 @@ SQL CODE:
             -> not DESC order and LIMIT 1, top gender counted
             SELECT gender, count(*) FROM people GROUP BY gender ORDER BY count(*) DESC LIMIT 1;
 
-        UPDATE - almost what it says it is. we update values. **NOTE this is destructive we are replacing values in the DB, we should have backups
-            UPDATE table_name SET column 1 = value, column2 = value, WHERE condition = otherValue;
+        UPDATE - almost what it says it is. we update values. **NOTE this is destructive we are replacing values in the DB, we should have backups  https://www.w3schools.com/sql/sql_update.asp
+                    UPDATE table_name SET column 1 = value, column2 = value, WHERE condition = otherValue;
             -> basically select rows where certain condition, now overwrite certain column data on these selected rows, its a "find and replace"
             -> if we omit the WHERE clause, all records will be updated!
             **ALWAYS BACK UP data since we can override data if we forget WHERE condition!
@@ -250,6 +254,16 @@ SQL CODE:
             -> we now combine 3 conditions with WHERE and multiple operators
                 SELECT * FROM people WHERE favorite_color = 'red' AND gender = 'Female' AND age > 50;
 
+        UNION - combine results from two or more SELECT statements and get the column in common from them
+            this is NOT like join, joins gets us the columns we want to combine from multiple tables
+            -> where UNION gives us only the matching data columns from both tables.
+                SELECT City FROM Customers UNION ALL SELECT City FROM Suppliers;
+
+        EXIST - return matching columns if record exist, we can use server validation then possibly check if the email is already registered in the database
+            -> basically like joins https://www.techonthenet.com/sql/exists.php
+            SELECT column_name(s) FROM table_name WHERE EXISTS (SELECT column_name FROM table_name WHERE condition);
+
+
 
         JOIN - combine rows from 2 or more columns based on data between them, likely the primary key/ foreign key that matches and other stuff
               -> here we combine data with the same id, but we select everything, so there are 2 columns showing same id, peoplehalf1.id & peoplehalf2.id
@@ -270,7 +284,24 @@ SQL CODE:
                          JOIN peoplehalf2 p2
                             ON p1.id = p2.id;
 
+        INDEX - makes searching in the db more quickly, by turning our data from a list, to a node tree https://use-the-index-luke.com/
+            -> the tradeoffs are more storage space to create this, and it slows down writes, in a big db, this storage space can be too expensive
+            ->
+                CREATE INDEX index_name ON table_name (column1, column2);
+            -> delete index
+                DROP INDEX index_name ON table_name;
 
+        TRANSACTION - multiple queries that must happen after another and not be interupted https://www.cockroachlabs.com/docs/stable/transactions
+
+
+
+
+        Injection attacks - https://www.w3schools.com/sql/sql_injection.asp
+            using single quotes to input variables leaves room for the user to input email in single quotes
+            -> then the attacker can put sql code to run in single quotes.
+                https://www.comparitech.com/blog/information-security/sql-injection-prevention-tips-for-web-programmers/
+                https://snyk.io/blog/sql-injection-cheat-sheet/
+            -> using placeholders combined with server size text validation will help big.
 
         CHAR vs VARCHAR - the type of data into the column for sql, Character vs variable character
             CHAR - fixed length, if we have CHAR(10) and "mike" goes in there, it uses 6 empty bytes of space.. oof.
@@ -283,6 +314,113 @@ SQL CODE:
 
                 we can NOT simply always use VARCHAR since it uses more cpu cycles, it will slow us down more than CHAR when we can use it
                     -> this means the database must check the data's length as well as content when searching. vs CHAR() telling the db its length.
+
+
+
+        CockroachLabs DB - settings up and important things to remember
+            JSON data in a column - https://www.cockroachlabs.com/docs/v23.1/jsonb#create-a-table-with-a-jsonb-column
+
+            Default values constraint(like foreign key constraint) - when creating the table, this is a constraint, so if we forget a value our set default goes in it's place, but if
+                -> we explicitly set NULL value, it can still be null. usually, if we forget a value then NULL will be the value https://www.cockroachlabs.com/docs/v23.1/default-value
+
+            CHECK constraint - we can make sure a value going into column is a certain value or between a range, etc.. we probably want to validate in nodejs before this
+                -> but can also use this validation for certain values as well https://www.cockroachlabs.com/docs/v23.1/check
+                    warranty_period INT CHECK (warranty_period BETWEEN 0 AND 24)
+
+            serverless functions - since we might not have our own server, these functions need to reconnect again and again, so the solution might be a pool
+                -> this will help serverless stay connected to cockroachdb https://www.cockroachlabs.com/docs/stable/serverless-function-best-practices
+
+            CASCADE - when using foreign key references to ids in other tables, we might update or delete these values. Cascade lets us
+                -> update/delete all matching values, when one is changed/deleted  https://www.cockroachlabs.com/blog/what-is-a-foreign-key/#so-what-is-the-actual-benefit-of-using-foreign-keys
+
+            Performance main read -> https://www.cockroachlabs.com/docs/stable/make-queries-fast
+            performance -> NOT NULL Joining foreign keys -when joining we can add NOT NULL for performance gains https://www.cockroachlabs.com/blog/performance-benefits-of-not-null-constraints/
+             UUID -> generate UUID when making the table,    id UUID NOT NULL DEFAULT gen_random_uuid()
+
+            Regions -regions are used to make sure we have our database close to us as possible, also cockroachdb gives us backups in case the db goes offline so
+                there is never any downtime
+                -> check regions for cluster or database  https://www.cockroachlabs.com/docs/v23.1/show-regions#response
+                    -> we only specified 1 region when making the cluster, and nothing special when making our tables.
+                    -> and we get this back from cluster region search gcp-us-east1 ["gcp-us-east1-b","gcp-us-east1-c","gcp-us-east1-d"]
+
+                Global tables -  will reduce reads as it gives us regions everwhere but now.. every time we write data we have to write to every db everywhere
+                    -> basically use global if we rarely have to write data and need it available to all regions. https://www.cockroachlabs.com/docs/v23.1/table-localities
+                    cons: writes incur higher latencies from any given region
+
+                regional table - when application requires low latency reads from a single region. Think about where the customers for our product are,
+                    -> if they are US only, then global doesn't make sense.
+
+                *set Regions - Cockroachdb gives us 3 zones where our db is stored, if there are any failures, our data is act risk.
+                    -> in production we might want to up the amount of regions our data is stored   https://www.cockroachlabs.com/docs/v23.1/multiregion-survival-goals#when-to-use-zone-vs-region-survival-goals
+                    cons: increases write time, since we now have 9 instead of 3, ou will pay additional write latency in exchange for the increased resiliency.
+                    pros: we get more stability
+
+                    -> our cluster MUST have multi regions before we can add this to the databases in the cluster
+                        -> determine if we will have global customers or us only.
+                            https://www.cockroachlabs.com/blog/build-a-highly-available-multi-region-database/
+                            https://www.cockroachlabs.com/docs/v23.1/alter-database#set-secondary-region
+                            https://www.cockroachlabs.com/docs/stable/show-regions
+
+                         1) we need multiple regions on a cluster, preferably pick 3 when creating it
+                         2) now we add a primary region from cluster to db, and add other 2 regions to the db
+                                ALTER DATABASE defaultdb PRIMARY REGION "gcp-us-east1";
+                                ALTER DATABASE defaultdb ADD REGION "gcp-us-west2";
+                                ALTER DATABASE defaultdb ADD REGION "gcp-us-central1";
+                                ALTER DATABASE defaultdb SET SECONDARY REGION "gcp-us-central1";
+                                SHOW REGIONS FROM DATABASE defaultdb;
+                            SHOW REGIONS FROM DATABASE defaultdb;
+                            -> now regions should show up in the database
+                                 https://www.cockroachlabs.com/docs/stable/multiregion-survival-goals
+                            Zone failures - the default for multi region dbs are zone survival, which means if one zone fails, we use another, potentially go down if multiple
+                                zones in a region fail as well. we can choose region survival, but this makes writes much slower as we now write to many different regions
+                        3) ALTER DATABASE db_name SURVIVE REGION FAILURE;
+                            -> now we have 2 backups on primary region, 2 on secondary and 1 on 3rd
+                                https://www.cockroachlabs.com/blog/build-a-highly-available-multi-region-database/
+
+
+                                SHOW SURVIVAL GOAL FROM DATABASE db_name
+
+                        4) when we now have different regions, by default our tables locality is region by table, that means people closer
+                            -> to our main table will load faster, we can use region by row, so each individual row query loads from database closer to the user
+                                -> global region makes every region in the db 'home', this makes writes much slower, since ALL regions must be written to every time
+                                -> use this for low writing/editing websites.. but it gives fast reads anywhere in our region list
+
+                                -> we will likely use region by row for all around the us.
+                                https://www.cockroachlabs.com/docs/stable/table-localities#regional-tables
+                            https://www.cockroachlabs.com/blog/regional-by-row/
+                    -> You can add up to six regions at a time and change your primary region through the Cloud Console. You cannot currently edit the region
+                        -> configuration for a single-region cluster once it has been created, and you cannot remove a region once it has been added
+
+
+                Backups of our own db - https://www.cockroachlabs.com/docs/cockroachcloud/take-and-restore-customer-owned-backups
+
+
+                IF - not exactly like js, but similar to a ternary, giving us 2 options in parenthesis https://www.w3schools.com/sql/func_mysql_if.asp
+                            IF(condition, value_if_true, value_if_false)
+                            -> we combine to validate if table exist, if not, then create it
+                        CREATE TABLE IF NOT EXISTS accounts (id INT8 PRIMARY KEY, balance DECIMAL);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

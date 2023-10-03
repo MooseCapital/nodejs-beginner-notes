@@ -26,6 +26,16 @@
         -> asynchronous, event driven runtime. Means we do NOT try to predict when things will get done, we start multiple processes/functions
             ->when those are done, it goes on to the next step, nothing ever blocks the "stack" that would only let us do one thing at a time vs starting many
 
+    dotenv - we put sensitive information like api keys, databse logins in the .env file where noone will see it and
+        it is ignored, no github upload. we need a package
+
+        npm i dotenv
+        -> in the nodejs file write :  require('dotenv').config();
+        -> access variables with process.env  process.env.DATABASE_URL
+        -> if we see any .env.example files in github, it is a format to help us, we copy it and put our own info
+
+
+
     Package.json - we have experience with this, as each project needed to, npm i -y to download all packages
         these pages show much information about each dependency, the module creators, and versions.. etc
         https://github.com/nodejs/nodejs.dev/blob/aa4239e87a5adc992fdb709c20aebb5f6da77f86/content/learn/node-js-package-manager/package-json.en.md
@@ -248,7 +258,7 @@
 
         debugging - we can simply watch our file with nodemon and use console.log() for everything.. but eventually we get hundreds of logs
             -> AND the most important part, the data can change after we have logged it, so we miss that error! this is where breakpoints come in
-
+            go to about:inspect  in chrome
             All we have to do to set it up is a few commands
             1) node --inspect --watch filename.js -> we combined --watch and --inspect, it seems to be working
             2) in our console, we get a link like 127.0.0.1:9229 -> put that into chrome search
@@ -264,6 +274,38 @@
     http -
 
 
+        SQL testing in node -
+            we used peoplehalf1 sql file with 200 rows. to select an id in node goes from 33.08 thousand request units to 33.16 out of 50 million
+                -> we go through the setup guide and initially can run our sql file to make the table and stuff
+                        (async () => {
+                          await client.connect();
+                          try {
+                            const peoplehalf1 = FS.readFileSync(path.join(__dirname, './peoplehalf1.sql')).toString();
+                            const results = await client.query(peoplehalf1);
+                            console.log(results);
+                          } catch (err) {
+                            console.error("error executing query:", err);
+                          } finally {
+                            client.end();
+                          }
+                        })();
+                -> after the table is created, re running that code gives error, so not again. now we can run querys like this
+                        async function testDB() {
+                          try {
+                            await client.connect()
+                            const results = await client.query('SELECT * FROM peoplehalf1 WHERE id = 7');
+                            console.log(results.rows)
+                          } catch (err) {
+                            console.error("error executing query:", err);
+                          }
+                        }
+                        testDB();
+
+
+
+
+        Passwords - we can NOT store plaintext passwords in our database, we should offer 2fa for customers but
+            -> also have good cryptography, this is made easy with hashing packages https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
 
 
 
