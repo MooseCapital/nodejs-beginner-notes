@@ -394,19 +394,85 @@ SQL CODE:
 
                 Backups of our own db - https://www.cockroachlabs.com/docs/cockroachcloud/take-and-restore-customer-owned-backups
 
-
-                IF - not exactly like js, but similar to a ternary, giving us 2 options in parenthesis https://www.w3schools.com/sql/func_mysql_if.asp
-                            IF(condition, value_if_true, value_if_false)
-                            -> we combine to validate if table exist, if not, then create it
-                        CREATE TABLE IF NOT EXISTS accounts (id INT8 PRIMARY KEY, balance DECIMAL);
+        connecting to db in jetbrains - we must not use sslverify
+            postgresql://USERNAME:<PASSWORDHERE>@<clustername>-442.jxf.cockroachlabs.cloud:26257/defaultdb
 
 
+                                                        CockroachDB end
+        _______________________________________________________________________________________________________________________________
+
+        IF - not exactly like js, but similar to a ternary, giving us 2 options in parenthesis https://www.w3schools.com/sql/func_mysql_if.asp
+                    IF(condition, value_if_true, value_if_false)
+                    -> we combine to validate if table exist, if not, then create it
+                CREATE TABLE IF NOT EXISTS accounts (id INT8 PRIMARY KEY, balance DECIMAL);
+
+
+             MYSQL vs Postgres - https://www.reddit.com/r/SQL/comments/exrc9s/postgres_vs_mysql/
+                -> when trying to insert the same sql file to planetscale that worked perfectly with cockroachdb, we had insert error at position 120, no matter what
+                -> there was no syntax error. it is just not worth the time unless cockroachdb gets too expensive.
 
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Planet scale - we tried cockroach labs which uses postgres, planetscale uses MYsql so we need a different  package for node.
+                -> also we are seeing if planetscale can be cheaper.
+                    https://github.com/sidorares/node-mysql2
+                    npm install --save mysql2
+
+                const mysql = require('mysql2')
+                // Create the connection to the database for planetscale
+                const connection = mysql.createConnection(process.env.DATABASE_URL_MY)
+
+                // simple query
+                connection.query('show tables',
+                  function (err, results, fields) {
+                  console.log(results) // results contains rows returned by server
+                  console.log(fields) // fields contains extra metadata about results, if available
+                  console.log(err)
+                })
+                -> this is for user inputted data, using placeholders.
+                // Example with placeholders, placeholder is question mark ?, then values to input are in array brackets [], this prevents most injection attacks
+                connection.query('select 1 from dual where ? = ?', [1, 1], function (err, results) {
+                  console.log(results)
+                })
+                connection.end()
+
+                connection.execute() can help against injection attacks combined with placeholders above, over simple queries and basic quotes for input variables
 
 
 

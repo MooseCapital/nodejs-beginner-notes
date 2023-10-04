@@ -1,14 +1,14 @@
 
-create table peoplehalf1 (
-	id INT NOT NULL ,
-	first_name VARCHAR(50),
-	gender VARCHAR(90),
-	country VARCHAR(50),
-	race VARCHAR(50),
-	PRIMARY KEY(id)
-);
+-- create table peoplehalf1 (
+-- 	id INT NOT NULL ,
+-- 	first_name VARCHAR(50),
+-- 	gender VARCHAR(90),
+-- 	country VARCHAR(50),
+-- 	race VARCHAR(50),
+-- 	PRIMARY KEY(id)
+-- );
 
-insert into peoplehalf1 (id, first_name, gender, country, race) values (1, 'Charlotte', 'Female', 'Slovenia', 'Ottawa');
+-- insert into peoplehalf1 (id, first_name, gender, country, race) values (1, 'Charlotte', 'Female', 'Slovenia', 'Ottawa');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (2, 'Dudley', 'Male', 'China', 'Fijian');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (3, 'Tony', 'Polygender', 'Argentina', 'Choctaw');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (4, 'Lindsey', 'Female', 'Indonesia', 'Cheyenne');
@@ -42,8 +42,8 @@ insert into peoplehalf1 (id, first_name, gender, country, race) values (31, 'Nev
 insert into peoplehalf1 (id, first_name, gender, country, race) values (32, 'Billy', 'Male', 'Japan', 'Choctaw');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (33, 'Sileas', 'Female', 'United States', 'Aleut');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (34, 'Man', 'Male', 'Brazil', 'Central American');
-insert into peoplehalf1 (id, first_name, gender, country, race) values (35, 'Perle', 'Female', 'China', 'Native Hawaiian and Other Pacific Islander (NHPI)');
-insert into peoplehalf1 (id, first_name, gender, country, race) values (36, 'Northrup', 'Male', 'Japan', 'American Indian and Alaska Native (AIAN)');
+insert into peoplehalf1 (id, first_name, gender, country, race) values (35, 'Perle', 'Female', 'China', 'Native Hawaiian');
+insert into peoplehalf1 (id, first_name, gender, country, race) values (36, 'Northrup', 'Male', 'Japan', 'American Indian');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (37, 'Coralie', 'Female', 'Indonesia', 'Sri Lankan');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (38, 'Cyrill', 'Male', 'Cyprus', 'Native Hawaiian');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (39, 'Katee', 'Female', 'Philippines', 'Latin American Indian');
@@ -109,7 +109,7 @@ insert into peoplehalf1 (id, first_name, gender, country, race) values (98, 'May
 insert into peoplehalf1 (id, first_name, gender, country, race) values (99, 'Billi', 'Female', 'Indonesia', 'Comanche');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (100, 'Chuck', 'Male', 'France', 'Filipino');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (101, 'Corrine', 'Female', 'Brazil', 'Salvadoran');
-insert into peoplehalf1 (id, first_name, gender, country, race) values (102, 'Lusa', 'Female', 'Russia', 'American Indian and Alaska Native (AIAN)');
+insert into peoplehalf1 (id, first_name, gender, country, race) values (102, 'Lusa', 'Female', 'Russia', 'American');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (103, 'Adriane', 'Female', 'Russia', 'Lumbee');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (104, 'Rip', 'Male', 'Belarus', 'Mexican');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (105, 'Juline', 'Female', 'Russia', 'Apache');
@@ -149,7 +149,7 @@ insert into peoplehalf1 (id, first_name, gender, country, race) values (138, 'Ky
 insert into peoplehalf1 (id, first_name, gender, country, race) values (139, 'Harriett', 'Genderfluid', 'Croatia', 'Cuban');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (140, 'Bradan', 'Male', 'Indonesia', 'Native Hawaiian');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (141, 'Lenka', 'Non-binary', 'China', 'Cheyenne');
-insert into peoplehalf1 (id, first_name, gender, country, race) values (142, 'Ailbert', 'Genderfluid', 'Argentina', 'American Indian and Alaska Native (AIAN)');
+insert into peoplehalf1 (id, first_name, gender, country, race) values (142, 'Ailbert', 'Genderfluid', 'Argentina', 'American');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (143, 'Mercedes', 'Female', 'Indonesia', 'Potawatomi');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (144, 'Roseline', 'Female', 'Moldova', 'Chinese');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (145, 'Patrizio', 'Male', 'Yemen', 'Central American');
@@ -163,7 +163,7 @@ insert into peoplehalf1 (id, first_name, gender, country, race) values (152, 'Ta
 insert into peoplehalf1 (id, first_name, gender, country, race) values (153, 'Noam', 'Male', 'Indonesia', 'Cuban');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (154, 'Radcliffe', 'Male', 'China', 'Cherokee');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (155, 'Wilbert', 'Male', 'Portugal', 'Navajo');
-insert into peoplehalf1 (id, first_name, gender, country, race) values (156, 'Cheri', 'Female', 'Guatemala', 'American Indian and Alaska Native (AIAN)');
+insert into peoplehalf1 (id, first_name, gender, country, race) values (156, 'Cheri', 'Female', 'Guatemala', 'American Indian');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (157, 'Gabi', 'Male', 'Thailand', 'Central American');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (158, 'Mylo', 'Male', 'China', 'Melanesian');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (159, 'Alasdair', 'Polygender', 'China', 'Guamanian');
@@ -185,17 +185,17 @@ insert into peoplehalf1 (id, first_name, gender, country, race) values (174, 'Wh
 insert into peoplehalf1 (id, first_name, gender, country, race) values (175, 'Thadeus', 'Male', 'Thailand', 'Samoan');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (176, 'Hew', 'Polygender', 'Indonesia', 'Yaqui');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (177, 'Sondra', 'Female', 'Brazil', 'Filipino');
-insert into peoplehalf1 (id, first_name, gender, country, race) values (178, 'Bearnard', 'Male', 'China', 'American Indian and Alaska Native (AIAN)');
+insert into peoplehalf1 (id, first_name, gender, country, race) values (178, 'Bearnard', 'Male', 'China', 'American Indian');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (179, 'Anders', 'Male', 'Philippines', 'Paiute');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (180, 'Jeno', 'Male', 'Russia', 'Yaqui');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (181, 'Bertha', 'Female', 'China', 'Lumbee');
-insert into peoplehalf1 (id, first_name, gender, country, race) values (182, 'Gael', 'Female', 'Greece', 'Tohono O''Odham');
+insert into peoplehalf1 (id, first_name, gender, country, race) values (182, 'Gael', 'Female', 'Greece', 'Tohono O Odham');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (183, 'Tamas', 'Male', 'Portugal', 'Black or African American');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (184, 'Gerek', 'Male', 'Poland', 'Paiute');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (185, 'Kale', 'Male', 'Slovenia', 'Kiowa');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (186, 'Beverlie', 'Female', 'Peru', 'Malaysian');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (187, 'Elsey', 'Female', 'Greece', 'American Indian');
-insert into peoplehalf1 (id, first_name, gender, country, race) values (188, 'Kellie', 'Female', 'United States', 'Native Hawaiian and Other Pacific Islander (NHPI)');
+insert into peoplehalf1 (id, first_name, gender, country, race) values (188, 'Kellie', 'Female', 'United States', 'Native Hawaiian');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (189, 'Ford', 'Male', 'Burkina Faso', 'Houma');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (190, 'Deb', 'Female', 'Guatemala', 'Micronesian');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (191, 'Wye', 'Male', 'Burkina Faso', 'Menominee');
@@ -208,5 +208,3 @@ insert into peoplehalf1 (id, first_name, gender, country, race) values (197, 'Ge
 insert into peoplehalf1 (id, first_name, gender, country, race) values (198, 'Caitlin', 'Female', 'Indonesia', 'Creek');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (199, 'Lavina', 'Female', 'Indonesia', 'Houma');
 insert into peoplehalf1 (id, first_name, gender, country, race) values (200, 'Gibb', 'Male', 'China', 'Pima');
-
-SELECT first_name FROM peoplehalf1 WHERE EXISTS (SELECT first_name FROM peoplehalf1 WHERE first_name = 'Toddie');
