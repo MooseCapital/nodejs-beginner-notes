@@ -309,6 +309,21 @@
 
 
 
+        NOSQL - Mongodb is typically the most popular nosql database. There are 4 broad categories of nosql
+                Document stores - most popular type of nosql, looks like traditional sql but no scheme no normalization.
+                graph databases - niche type of nosql, most common use is face people you may know
+                key-value stores - most straightforward, holds collections of key-value pairs, perfect for caching or storing session data
+                wide-column data stores - similar to key-value but a key holds access to columns. such as time series db.
+                new sql - like snowflake that combines normal sql with nosql speeds
+
+                normally we will need a combination of each and shouldn't try to make a nosql or sql db work when we need the other.
+                    -> sql can now hold json data, but, mongodb is much cheaper in storage being a normal document store unlike sql that's using json
+                    -> so our storage cost on a serverless sql like cockroachlabs or planetscale will be MUCH higher than on mongodb, if we just want documents
+                    -> and lots of text, so use a combination!!
+
+
+
+
 *  */
 
 

@@ -16,7 +16,7 @@
         SQL - structured query language, programming language used to communicate with relational databases.
         https://www.w3schools.com/sql/default.asp
 
-
+        https://www.postgresqltutorial.com/postgresql-getting-started/what-is-postgresql/
 
     To connect sql to nodejs, we have something like np for postgresql, https://node-postgres.com/ for raw queries.
         npm install np
@@ -36,16 +36,20 @@ SQL CODE:
                 CREATE TABLE people (id PRIMARY KEY, name varchar(255), age int)
                 CREATE TABLE people (id PRIMARY KEY AUTO_INCREMENT, name varchar(255), age int)
 
-        Table data types -
+        Table data types - constraints
             BLOB - binary data type
             INTEGER - number
+            DECIMAL - for decimal numbers like money, pick decimal places, shorthand DEC(2,10)
+            DATE - YYYY-MM-DD , TIMESTAMP/DATETIME just adds time YYYY-MM-DD HH:MI:SS
             NUMERIC - date/time in standardized format, YYYY-MM-DD
             REAL - decimal point number
+            VARCHAR - can select limit with (), will adjust space down to length it uses, for unknown lengths VARCHAR(20)
+            CHAR - strict character limit that will use the entire space we pick, only for known text lengths CHAR(10)
             TEXT - string text
             UUID - type in PostgreSQL for uuids - https://www.cockroachlabs.com/docs/stable/uuid#create-a-table-with-auto-generated-unique-row-ids
             NOT NULL - will give error if we don't input value or put in null when inserting, this helps if cell can NOT be blank
-            UNIQUE - when we want to make sure any value in column is truly unique, like email address, ssn.. etc
-
+            UNIQUE - when we want to make sure any value in column is truly unique, like email address, ssn.. etc https://www.cockroachlabs.com/docs/v23.1/unique
+            DEFAULT - set default value if none is written, for cockroachdb, we can put UUID function as default to generate it.
             PRIMARY KEY - constraint uniquely identifies each record in a table. no null values
                 -> inserting in table could look like, ID int NOT NULL PRIMARY KEY,
 
@@ -101,8 +105,8 @@ SQL CODE:
                 -> 2) we can repeat the query above in another way, using JOINS basically joining, people id, stars id, show id columns
                     -> Implicit way, tell sql join and it does, next is explicit, where we match the data exactly, not JOIN for us..
                         SELECT title FROM people
-                            INNER JOIN stars ON people.id = stars.person_id
-                            INNER JOIN shows on stars.show_id = shows.id
+                            JOIN stars ON people.id = stars.person_id
+                            JOIN shows on stars.show_id = shows.id
                             WHERE name = 'Steve Carel';
 
                 -> 3) Explicit way, we tell sql exactly where to select title column, and to match id = other tables id
@@ -154,6 +158,9 @@ SQL CODE:
             MAX - gives largest number value in a column, if text only, it gives alphabetical order closest to Z.
             MIN - gives smallest number value in column, if text only, it gives alphabetical order closest to A.
             UPPER
+            Length() - get the length of letters in text
+
+
 
         DISTINCT - gives each Unique value in a column, the country gave us 40 rows, so we know there are 40 countries
             -> but we want to COUNT that in the future, remember distinct is counting overlapping unique values
@@ -177,13 +184,13 @@ SQL CODE:
         LIKE - instead of searching exactly, we can search for starting letter etc.. like regex pattern in javascript
         ORDER BY - sorting use, ORDER BY (column_name) ASC if going to biggest, or DESC if starting big to smallest.
         LIMIT - limit number of rows we get back, if its large amount.. get smaller amount
-        GROUP BY -
+        GROUP BY - how to group calculated data from a single or multiple tables. ex count the # of all post, group by its id or name etc.
 
-        WHERE - filter values specifically, put in single quotes for comparing text values. Operators used with 'WHERE' -> =, >, <, >=, <= ,
-            <> means not equal, some sql versions use js standard !=   , BETWEEN -> between a certain range, between seems to simplify using a combination > and <
-            LIKE -> search for a pattern,  IN ->to specify multiple possible values for a column
-            SELECT * FROM people WHERE favorite_color = 'blue'; -> we get every row that has 'blue' for favorite color,  26 rows listed
-            SELECT COUNT(*) FROM people WHERE favorite_color = 'blue'; -> count how many rows count 'blue' for favorite color - 26
+        WHERE - filter values specifically, put in single quotes for comparing text values. Operators used with 'WHERE' -> =, >, <, >=, <= , <>
+        <>  - means not equal, some sql versions use js standard !=   , BETWEEN -> between a certain range, between seems to simplify using a combination > and <
+        LIKE -> search for a pattern,  IN ->to specify multiple possible values for a column
+        SELECT * FROM people WHERE favorite_color = 'blue'; -> we get every row that has 'blue' for favorite color,  26 rows listed
+        SELECT COUNT(*) FROM people WHERE favorite_color = 'blue'; -> count how many rows count 'blue' for favorite color - 26
 
         BETWEEN - gives values within a range
             SELECT column_name(s) FROM table_name WHERE column_name BETWEEN value1 AND value2;
@@ -191,6 +198,8 @@ SQL CODE:
                 SELECT * FROM Products WHERE Price NOT BETWEEN 10 AND 20;
             -> we combine a between query and 'IN' for multiple options, ages 20-40 while checking for favorite colors that aren't purple or blue.
                 SELECT * FROM people WHERE age BETWEEN 20 AND 40 AND favorite_color NOT IN ('purple', 'blue');
+
+        IS - IS NULL lets us select NULL items or when its empty. we can NOT do where item = NULL -> item IS NULL
 
 
         IN - lets us select multiple values in a WHERE condition, so we have more options easily
@@ -211,17 +220,62 @@ SQL CODE:
 
             -> this simply searches for country starting with C, no defined length
                 SELECT * FROM people WHERE country LIKE 'C%';
+            -> if we put % in front of search term, it can be any length, so 'cat' search could be anywhere in the sentence, where __ defines length
+                SELECT * FROM animals WHERE animal LIKE '%cat%'     -> gray shorthair cat
             -> underscore can define a max length for us, here we don't search exact names, but first names with 4 letters only
                 SELECT * FROM people WHERE first_name LIKE '____';
 
+        SUBSTR - similar to LIKE, but now we can define a start/end index for the text search,
+            this is like in js, grab letters in index position of a string
+                SUBSTR(column_name, startindex, number_of_characters_tocount) -> SUBSTR(name,1)  -> we start at one and count whole string
 
+        LEFT -  similar to substr except we start at index and count to left instead of right
+            -> if our name is moose, we start at index 3, count left and get 'Moo'
+                LEFT(name, 3)
+
+        CASE - is the equivalent to the "switch" statement in js, or if,else.. when it finds a true statement, it stops. if none are found. it goes to 'else'
+                 -> if there is no else part, it stops and returns null
+                 -> we select our table or columns, then make a new column with these values matching up with the others
+                    -> this is a temporary change, we can probably use case to update columns as well
+                        SELECT *,
+                        CASE WHEN species = 'human' THEN "talk"
+                        CASE WHEN species = 'cat' THEN "meow"
+                        CASE WHEN species = 'dog' THEN "bark"
+                        ELSE NULL
+                        END AS sound
+                        FROM friends_of_pickles;
+
+
+        Coalesce - returns the first item in all columns that is NOT null, https://www.w3schools.com/sql/func_sqlserver_coalesce.asp
+            SELECT name, COALESCE(gun, sword) AS weapon FROM fighters;
 
         GROUP BY - we select multiple columns and group it by one, earlier if we SELECT COUNT(color) -> we simply get 1 columns with counts of all colors
             -> this data does NOT tell us much because we get the counts but I don't know which colors have the counts, so i need another column to tell me
                 -> we must GROUP BY the same column we select to get relevant data, or else were shown data that is not the same column we select, not useful..
                 SELECT gender, count(*) FROM people GROUP BY gender;
 
-        ORDER BY - sort a list
+            -> above is only counting / grouping data in a single table. below is combing multiple
+            -> when joining tables, we need to group by a certain column, such as when getting the count of all post a users id has, group by user id/name
+                SELECT users.id, users.name, COUNT(posts.id) AS posts_written
+                  FROM users
+                  JOIN posts ON users.id = posts.user_id
+                  GROUP BY users.id;
+            -> we use GROUP BY to group the row data by a certain column first, then can set a condition on top of that with having, not where.
+            select count(customerid), state from customers
+            group by state
+            having count(customerid) > 1;
+
+
+        Having - is essentially the WHERE for aggregates. Conditionally retrieve records from aggregate functions,
+            -> when using the count of a columns data from joining 2 tables, then group BY..
+            -> we can NOT simply use where to get a specific users aggregated data form 2 table joins. HAVING replaces where for this!
+                 SELECT users.id, users.name, COUNT(posts.id) AS posts_written
+                  FROM users
+                  JOIN posts ON users.id = posts.user_id
+                  GROUP BY users.id
+                  HAVING posts_written >= 10;
+
+        ORDER BY - sort a list, used when we want largest number in a column and need the rest of a rows data. order by largest then LIMIT 1, get all its data.
             -> we get 2 columns, gender and the count of each in 2nd column, then order least to greatest count.
             -> we could also order by gender, going from a-z, but the numbers are now no longer least to greatest..
             SELECT gender, count(*) FROM people GROUP BY gender ORDER BY count(*);
@@ -231,6 +285,8 @@ SQL CODE:
             -> not DESC order and LIMIT 1, top gender counted
             SELECT gender, count(*) FROM people GROUP BY gender ORDER BY count(*) DESC LIMIT 1;
 
+            SELECT * FROM friends_of_pickles ORDER BY height DESC;
+
         UPDATE - almost what it says it is. we update values. **NOTE this is destructive we are replacing values in the DB, we should have backups  https://www.w3schools.com/sql/sql_update.asp
                     UPDATE table_name SET column 1 = value, column2 = value, WHERE condition = otherValue;
             -> basically select rows where certain condition, now overwrite certain column data on these selected rows, its a "find and replace"
@@ -238,7 +294,7 @@ SQL CODE:
             **ALWAYS BACK UP data since we can override data if we forget WHERE condition!
 
             -> we set all favorite_color to purple, on only female genders * we typed 'female' first, case-sensitive always!
-            UPDATE people SET favorite_color = 'purple' WHERE gender = 'Female';
+                UPDATE people SET favorite_color = 'purple' WHERE gender = 'Female';
 
         DELETE - delete records like UPDATE updates them.
             -> this deletes ALL records where condition is true, if condition is omitted, ALL records will be deleted
@@ -254,15 +310,34 @@ SQL CODE:
             -> we now combine 3 conditions with WHERE and multiple operators
                 SELECT * FROM people WHERE favorite_color = 'red' AND gender = 'Female' AND age > 50;
 
+        OR - same as || 'or' in js, gives us multiple different conditions, where AND requires multiple conditions to be true;
+                SELECT * FROM friends_of_pickles WHERE height_cm > 25 OR species = 'cat';
+
+        XOR - combination of or & and, where it works like or, but if both conditions are true it is excluded
+                -> here china is excluded, since its population is over 250m and area over 300km, other countries meeting one condition are included though
+                select name, population, area from world
+                where population > 250000000 xor area > 3000000
+
         UNION - combine results from two or more SELECT statements and get the column in common from them
             this is NOT like join, joins gets us the columns we want to combine from multiple tables
             -> where UNION gives us only the matching data columns from both tables.
                 SELECT City FROM Customers UNION ALL SELECT City FROM Suppliers;
 
-        EXIST - return matching columns if record exist, we can use server validation then possibly check if the email is already registered in the database
-            -> basically like joins https://www.techonthenet.com/sql/exists.php
+        EXIST - The EXISTS operator checks whether a subquery is empty or not, instead of checking whether values are in the subquery.
             SELECT column_name(s) FROM table_name WHERE EXISTS (SELECT column_name FROM table_name WHERE condition);
 
+
+        All - instead of seeing if a value is 'in' or not in another subquery search etc.. must satisfy condition with ALL the data in the set
+            -> likely used with other operates that aren't necessarily equal to, but greator/lesser
+                SELECT mID, Rating
+                FROM Review
+                WHERE Rating >= all (SELECT Rating FROM Review);
+
+        Any - like 'all' above, but does NOT have to satisfy condition with all elements, it only needs to meet the condition with one element in the data
+                -> this would return lots of values, since many have year above any movie values.
+                SELECT Title, Year
+                FROM Movie
+                WHERE Year > ANY (SELECT Year FROM Movie);
 
 
         JOIN - combine rows from 2 or more columns based on data between them, likely the primary key/ foreign key that matches and other stuff
@@ -272,7 +347,7 @@ SQL CODE:
                     SELECT * FROM peoplehalf1 JOIN peoplehalf2 on peoplehalf1.id = peoplehalf2.id WHERE shirt_size = 'M';
               -> make a join that might need 2 conditions, see buyers price range and homes for sale table..
                     -> we've joined 2 tables by BETWEEN condition, not id = id,
-                    -> we also used table alias's to save alot of typing. write the alias letter after JOIN and FROM table name
+                    -> we also used table alias's to save a lot of typing. write the alias letter after JOIN and FROM table name
                     SELECT h.price, h.id FROM buyers b JOIN houses h ON h.price BETWEEN b.min_price AND b.max_price
 
               -> column alias, since inner JOINS will give us multiple id columns when matching by id, we either select * simply,
@@ -284,6 +359,35 @@ SQL CODE:
                          JOIN peoplehalf2 p2
                             ON p1.id = p2.id;
 
+            self JOINS - joining 2 copies of the same table, some use cases are parent child / hierarchical relationships in the same table,
+                -> in the users table, we have column for employees, normal staff, managers, supervisors etc..
+                -> the manager would be a foreign key to the staff id in the same table, it would not make sense to have a whole new table for a category of employee
+                     ***   -> note we use alias for manager MAN that IS in the employee table -> simply treat the self join as a different table, join itself
+
+                        SELECT EMP.Name  AS Employee_Name, EMP.Title AS Emplyee_Title,
+                        MAN.Name AS Manager_Name, MAN.Title AS Manager_Title
+                        FROM Employees AS EMP
+                        LEFT JOIN Employees AS MAN
+                        ON EMP.Manager_Employee_ID = MAN.Employee_ID
+                                -> see how we join on the manager id vs employee id, this is where the data is different, likely null for normal employees
+
+                -> a persons example used self join to see if any accounts have duplicate emails, so we join these accounts into one id row
+                    SELECT a.id, b.id FROM account a
+                    JOIN account b on b.email = a.email
+                    WHERE b.id != a.id
+
+                    -> of course this use case is good for self joining, but in the referral case, we could have a new table matching each refer id to users
+
+            Outer joins -we will maybe use these 1% of the time, since a join is joining matching rows together all outer joins or not matched,
+                -> basically get which rows match between tables, and full outer, gets the rest. basically combine everything no matter what,
+                -> left/right outer join will only get from the left/right side that doesn't match etc..
+                -> when a table has no value or null value and we try to join by it, it will not be included, but we might want to include all the data
+                    -> so we would do a left/right join to get all data from the side we want or do OUTER join to get the other sides data as well
+                        SELECT teacher.name, dept.name
+                         FROM teacher LEFT JOIN dept
+                                   ON (teacher.dept=dept.id)
+
+
         INDEX - makes searching in the db more quickly, by turning our data from a list, to a node tree https://use-the-index-luke.com/
             -> the tradeoffs are more storage space to create this, and it slows down writes, in a big db, this storage space can be too expensive
             ->
@@ -291,10 +395,23 @@ SQL CODE:
             -> delete index
                 DROP INDEX index_name ON table_name;
 
-        TRANSACTION - multiple queries that must happen after another and not be interupted https://www.cockroachlabs.com/docs/stable/transactions
+            ->crdb will make the primary key auto index, so our UUID key will be auto indexed since we search by it most often
 
+        TRANSACTION - multiple queries that must happen after another and not be interrupted such as bank deposit/withdraw https://www.cockroachlabs.com/docs/stable/transactions
+                        https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-transaction/
+                    -> we want to be assured, either ALL of these transactions happen or NONE of them do, or.. we might have money doubling errors OOF!
+                -> any time during the transaction, we can ROLLBACK before COMMIT, to undo everything. Potentially useful with IF conditions or others
+                -> we ROLLBACK to a set savepoint, this can be at start or after we do certain things, this runs on database error, also on errors the entire
+                -> transaction would not complete either so that is good, no changes can be seen inside the transaction until AFTER COMMIT
 
-
+                -> if we do not have COMMIT, nothing will save to the database, postgres guarantees it will save to db on commit, even if crash happens right after
+                    BEGIN;
+                        SAVEPOINT foo;
+                        INSERT INTO kv VALUES (5,5);
+                        SAVEPOINT bar;
+                        INSERT INTO kv VALUES (6,6);
+                        ROLLBACK TO SAVEPOINT foo;
+                    COMMIT;
 
         Injection attacks - https://www.w3schools.com/sql/sql_injection.asp
             using single quotes to input variables leaves room for the user to input email in single quotes
@@ -368,15 +485,14 @@ SQL CODE:
                                 ALTER DATABASE defaultdb ADD REGION "gcp-us-central1";
                                 ALTER DATABASE defaultdb SET SECONDARY REGION "gcp-us-central1";
                                 SHOW REGIONS FROM DATABASE defaultdb;
-                            SHOW REGIONS FROM DATABASE defaultdb;
+
                             -> now regions should show up in the database
                                  https://www.cockroachlabs.com/docs/stable/multiregion-survival-goals
                             Zone failures - the default for multi region dbs are zone survival, which means if one zone fails, we use another, potentially go down if multiple
                                 zones in a region fail as well. we can choose region survival, but this makes writes much slower as we now write to many different regions
-                        3) ALTER DATABASE db_name SURVIVE REGION FAILURE;
+                        3) ALTER DATABASE db_name SURVIVE REGION FAILURE/ zone failure;
                             -> now we have 2 backups on primary region, 2 on secondary and 1 on 3rd
                                 https://www.cockroachlabs.com/blog/build-a-highly-available-multi-region-database/
-
 
                                 SHOW SURVIVAL GOAL FROM DATABASE db_name
 
@@ -385,14 +501,17 @@ SQL CODE:
                                 -> global region makes every region in the db 'home', this makes writes much slower, since ALL regions must be written to every time
                                 -> use this for low writing/editing websites.. but it gives fast reads anywhere in our region list
 
-                                -> we will likely use region by row for all around the us.
-                                https://www.cockroachlabs.com/docs/stable/table-localities#regional-tables
-                            https://www.cockroachlabs.com/blog/regional-by-row/
+                                -> we will likely use regional table, NO regional by row it is very hard setup, OR global tables
+                                    -> where writes are stored to every region
+                                    https://www.cockroachlabs.com/docs/stable/table-localities
+                                    https://www.cockroachlabs.com/blog/regional-by-row/
                     -> You can add up to six regions at a time and change your primary region through the Cloud Console. You cannot currently edit the region
                         -> configuration for a single-region cluster once it has been created, and you cannot remove a region once it has been added
 
 
                 Backups of our own db - https://www.cockroachlabs.com/docs/cockroachcloud/take-and-restore-customer-owned-backups
+                    -> make sure to have self backup schedule to s3 bucket, not a one time backup
+                        https://www.cockroachlabs.com/docs/v23.1/manage-a-backup-schedule#create-a-new-backup-schedule
 
         connecting to db in jetbrains - we must not use sslverify
             postgresql://USERNAME:<PASSWORDHERE>@<clustername>-442.jxf.cockroachlabs.cloud:26257/defaultdb
@@ -414,12 +533,25 @@ SQL CODE:
 
 
 
+        Cache vs nosql database - like redis or kafka https://upstash.com/, these are NOT our main sql database, these reduce main load from our database
+            -> redis is often used as cache or session storage. meaning a call to the main sql db once, then everything is in redis now to reduce main sql db load
+            -> if we have many blog post, we don't want to simply type our text in the react elements in HTML,
+            -> by putting our data in the database, no matter what front-end we use, simply call the data from db for our new front-end and get our blog post.
+            -> now our data is saved and backed up.
+            -> we use redis/ cache databases for things common to ALL users, not user specific.
+            -> we could have user logs in redis maybe, and use it like mongodb, hold documents.
+            -> in sql we can have an id for our json document/logs that are user specific. after sql query for user document id, query redis/nosql db for actual json doc
+            -> redis is mostly for cache that we might not do, whereas the json document store for blog post and other frequent big data like user logs, can be in mongodb serverless
+            -> we could have a table matching uuid user id, to a log id, with timestamp, we find users most recent log, then lookup all data we have on them in mongodb query
+                -> some startup forced to use sql, simply put json data in columns which we can use rather than learning mongodb.
+            NOSQL Database -
+            -> ** we only need to cache data so our main db isnt being hit, if we have MANY concurrent users.
 
 
-
-
-
-
+        Math - we can calculate like in javascript, but most things will be server calculated and validated
+            this could be for calculating some new column on the fly etc..
+            + - addition, - Subtraction, * multiplication, / division, % modulus remainder
+            round(x, d) rounds x value to d decimal places.. omit d for simple round, sqrt(x) square root
 
 
 
