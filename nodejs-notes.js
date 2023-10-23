@@ -321,6 +321,32 @@
                     -> so our storage cost on a serverless sql like cockroachlabs or planetscale will be MUCH higher than on mongodb, if we just want documents
                     -> and lots of text, so use a combination!!
 
+        Rate limit api - to prevent users from refreshing the page to spam our api and cost us lots of money & make it slower for other users. we
+            can limit the amount of times they call it like 10 times a minute, then if they keep refreshing, they get an error.
+            this will prevent api calls, then database calls. we can use something like an api limit package    https://www.npmjs.com/package/express-rate-limit
+            https://reflectoring.io/tutorial-nodejs-rate-limiter/    -> this prevents abuse, ddos attacks, gives fair allocation and
+
+
+        Nextjs - instead of vercel we can try self hosting with sst.dev or flight control, digitalocean app platform.. this lacks some easy vercel features like image optimization
+                -> so we have a package to reduce image sizes https://www.npmjs.com/package/sharp
+
+
+        Entire stack - if we don't use nextjs where our api is on nextjs routes.. we can simplify it by hosting our react spa on cloudfare, digitalocean or bunny.net
+            -> api can be on another domain to simplify the reverse proxy on different hosting locations, nodejs hosted with heroku,railway.app or
+                -> digitalocean app platform can start at $5 with auto scaling and load balancer for us so we configure nothing like a normal droplet
+                -> we use api rate limiter to limit times a user can refresh page then call the api and on other calls. so we can or not use cache on simple app
+                    -> simply use main postgres db and no cache with these rate limits.
+            -> database could also be in app platform but another specific service like neon.tech can be better
+            -> the main postgres database can be elsewhere, but to cache that db to reduce traffic.. we can host a redis cache on the app platform as well!
+
+            -> https://k6.io/ for a load tester, make sure our resources can handle x number of users.
+            -> .env secrets. we NEVER upload our private env variables, even to private repos.. so we can use things like https://www.envkey.com/
+                -> or in digitalocean it should let us manually input env keys, to never expose them in our git code push.
+
+            **-> we should always remember in production, if our database is on neon.tech, have many backups and also be signed up to services
+                -> where if anything were to happen, we can be up and migrated on a new database within a short time frame
+                -> same goes for the api, if digitalocean app platform were to go down, can we easily migrate to heroku or railway?
+
 
 
 
