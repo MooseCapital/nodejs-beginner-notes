@@ -41,13 +41,13 @@ async function run() {
     await client.connect();
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log("You successfully connected to MongoDB!");
   } catch (e) {
     console.log(`we have an error, oops: ${e}`)
+    await client.close();
   }
   finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
   }
 }
 run()
@@ -55,10 +55,10 @@ run()
 //mongodb test find query
 async function test() {
   try {
-    const database = client.db('sample_restaurants').collection('restaurants')
+    const database = client.db('app').collection('people')
     // const data = await client.db('sample_restaurants').collection('restaurants').findOne({cuisine: "Bakery"})
-    const data = await database.findOne({cuisine: "American"})
-    console.log(data.name)
+    const data = await database.findOne({friends: {$lt:100}})
+    console.log(data)
   } catch (err) {
     console.log(err);
   }

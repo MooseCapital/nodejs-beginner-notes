@@ -336,7 +336,9 @@
                 -> digitalocean app platform can start at $5 with auto scaling and load balancer for us so we configure nothing like a normal droplet
                 -> we use api rate limiter to limit times a user can refresh page then call the api and on other calls. so we can or not use cache on simple app
                     -> simply use main postgres db and no cache with these rate limits.
-            -> database could also be in app platform but another specific service like neon.tech can be better
+            -> database could also be in app platform but another specific service like neon.tech can be better, to not have multiple services in one server
+            -> this makes moving any one service very easy with minial downtime or affect to other services, such as nextjs ssr on vercel, api on digitalocean, database on neon.tech
+                -> once the bandwidth becomes too much, we go to digitalocean app platform for nextjs that goes to $10 100gb, vs $40 100gb for vercel
             -> the main postgres database can be elsewhere, but to cache that db to reduce traffic.. we can host a redis cache on the app platform as well!
 
             -> https://k6.io/ for a load tester, make sure our resources can handle x number of users.
@@ -347,6 +349,53 @@
                 -> where if anything were to happen, we can be up and migrated on a new database within a short time frame
                 -> same goes for the api, if digitalocean app platform were to go down, can we easily migrate to heroku or railway?
 
+        Authentication - we can sign users in with many different ways like email/password only or others such as google/facebook/github
+            *remember when deleting users, many databases simply have a column with deleted: true/false, this way we dont permanently delete a user by mistake
+                -> when we need space, then we delete all users with deleted: true, and were good to go.
+            -> auth comes in a few ways, either managed or self hosted/created
+            -> if we might have many free users then a paid option will be expensive when clerk.com is $20/1000 users, authO, okta etc..
+            -> we do NOT want to ever try google firebase auth since they increased sms cost 10kx from 10k free a day to only 10, and about .05$ per sms
+            -> firebase gives 50k active users free, BUT these are also locked into googles database, and they could raise rates at any time
+
+            * use clerk.com or paid service when we have high paying users, or lack free users/short term free users. so the saved setup auth time will be worth it
+            ** READ our bookmarked folder 'node auth signin' and watch the playlist 'authentication user' to decide which option fits our budget/needs.
+            * use a free setup when we might have many free users or long free trial period. There are many ways to self create auth
+            * we should try to make our own auth to fully understand it, like with a simple node-session, then learn how to create a 'forget password'
+                -> link, that uses our email api to send specific email to the right user, and lets them verify code to change password.
+                -> the point of this is to have complete control over our data and not be locked into firebase, and not get potential HUGE surprise google bills
+                -> the benefit of this is having loads of users for free and cheaper email/sms verification all by ourself.
+                -> for this, we should also try to learn how to add 2fa otp codes in a qr code to verify users, and a 2fa by sms.
+                -> when were done with this, we can make it a template and have easy  auth for all our cheap side projects.
+
+
+
+                -> passports for auth are OUTDATED do not use
+
+                -> client-sessions package, watch the videos in our user authentication playlist.   https://www.npmjs.com/package/client-sessions
+
+                -> super tokens - paid service that can be self hosted but still have to pay per users self hosted.. oof https://supertokens.com/
+
+
+            The process - first, remember ALL checking happens on the server NOT the client, this is to make things safe. a user can change client code,
+                -> if we had no server side check, then the user could access and do whatever, so we must have server side validation for everything
+                user signs in, if password etc.. is wrong or does not exist, the server responds with specific error.
+                -> if the info is correct, the user signs in and the server responds with the right user, then gives the user a cookie
+                -> now all request don't need users password, they have a cookie that gives them the authorization to access and do things
+
+                -> deleting the cookie is the same as logging out, this is why we have a autocookiedelete extension that stops cookies tracking us
+                    -> but then allow some websites we want to stay signed into.
+
+            Authentication vs Authorization - first one is simply logging in, make sure we are a specific user, authorization is making sure only
+                -> specific users can access the page we want them to access, such as our admin panel, only we want access! so we would make no one but us the admin
+                Authentication  - 401 unauthorized
+                authorization - 403 forbidden
+
+
+        Saas starter - as we see above, simply implementing authentication is complicated or we can pay to make it easy, now add many other services
+            There are services that combine these to make it easy for us, called saas starter kits or boilerplate's that combine things like payment subscriptions
+            we will have a list of these in our bookmark 'Saas starter kit' and post some below, the most important thing is to find one matching our language stack and with many reviews
+
+            https://github.com/smirnov-am/awesome-saas-boilerplates
 
 
 

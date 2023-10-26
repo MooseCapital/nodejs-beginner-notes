@@ -36,19 +36,187 @@
 
 
 
-    Connecting - to connect to mongodb in nodejs, make sure we have access to .env file with package : require('dotenv').config();
-        we go to our cluster -> database -> click connect -> get full code sample from nodejs
-        -> now paste the string in our .env file or this would be digitalocean env variables or another way to store
-        in .env file..
-            MONGODB_URI='mongodb+srv://user:pass@penguincluster1.u1vnogc.mongodb.net/?retryWrites=true&w=majority'
+    Connecting - remember in production no matter the database, we will use an ORM like mongoose for mongodb or knex for sql, to make sure our queries are safe.
+        to connect to mongodb in nodejs, make sure we have access to .env file with package :
+            require('dotenv').config();
+            npm init -y  -> if no package.json
+            npm i mongodb
+            we go to our cluster -> database -> click connect -> get full code sample from nodejs
+            -> now paste the string in our .env file or this would be digitalocean env variables or another way to store
+            in .env file..
+                MONGODB_URI='mongodb+srv://user:pass@penguincluster1.u1vnogc.mongodb.net/?retryWrites=true&w=majority'
 
-        our connection failed, until we used MONGODB_URI
+            our connection failed, until we used MONGODB_URI
 
+            we should have a SINGLE mongo client instance for all database request, because starting client instances/ connections are resource intensive.
+
+        shell - we click connect on mongodb website, and click shell, we install it on our os, then paste the shell link which ask for the password
+            -> now we can test mongodb commands without a programming language, simply learn the database language on its own first.
 
     network errors - if we get a network error on connecting, we should check in atlas, see if our ip is on the allowed list, such as our vps
 
 
+    shell -  inside the shell to navigate the database without a programming language without node, here are some commands
+        show dbs - list all databases
+        db - shows current database you are in.
+        use (database name) - switch to a certain database to be inside it.
+        cls - empty all text on terminal to make room, visual only
+        show collections - show all collections of documents inside a database
+        exit - exits us out of mongosh, we must input credentials again.
+        db.collection_name - input the collection name, after we have already 'use dbName' to go inside the database. this gets us inside a collection
+                -> db refers to current database we are in
+
+        Methods - we are testing in the shell, but it translates to any language like nodejs CRUD methods
+            CREATE
+            nested documents - instead of a normal string or number value, this is just having an object or array of objects as its value
+                -> this is like what we call embedding data above, not referencing it to another document.
+            insertOne() - db.collection-name.insertOne({name:'mike',age: 40}) insert a document in a collection  - after going into database,
+
+            insertMany([]) - db.collection-name.insertMany([{name:'sara',age: 20}, {name: 'sally', age: 24}]) - same as insertOne, inserts a document,
+                -> be inside an array, but we insert multiple at once, so the objects must
+                {name: 'sara', age: 24, favColor: 'red}
+
+            READ
+            find() - mongodb prints out the first 20 documents it gets in a collection, not specific at all, probably wont use the general way
+                -> db.collection-name.find() -> we get an array or object documents data
+
+                filter find() - search by specific property with find()
+                    db.collection-name.find({name:'bill'}) -> gives all documents where name is bill exactly, so it filters. we can add multiple properties to filter by
+                        db.collection-name.find({name:'bill', age:30})
+
+                    -> only return specific properties,simply pass in a second object , not everything, we always get id back with it
+                        -> see instead of in the same object, it's a separate one inside the parenthesis, and value:1 to give one property
+                        db.collection-name.find({name:'bill'}, {shirt_size:1,fav_color:1})
+
+                    -> NO filter, get every document back, but now only properties we want with it
+                        db.collection-name.find({},{car:1,shirt_size:1})  -> just leave first object empty for no filtering
+
+            findOne() - find the first document matching filter search, since we could have multiple matching, and we only get the first one
+                -> i think we will usually use findOne() with _id search.. since there is only one id per document.
+                db.collection-name.findOne({_id:ObjectId("6539d9c7c64d3167e6f1a4ce")}) -> same layout filter as before, gives specific user by id we want
+
+                db.people.findOne({gender:'Male'}) -> simply gives first user in collection that is Male, not very specific or useful..
+
+
+            sort & method chaining -
+                we can add methods on to find, like in sql. we can count the number of results from query
+                count -
+                    db.collection-name.find().count() -> returns count of all documents in collection
+                    db.people.find({car:'Honda'}).count() -> count a filter, gives 3 people with Honda car.
+
+                limit - limit number of results we return
+                    db.people.find({car:'Honda'}).limit(2)
+
+                sort - 1 is ascending order, -1 is descending order.  pick property to sort by in object
+                    -> notice we change multiple methods to limit the sorted return documents
+                    db.people.find().sort({name:1}).limit(3)
+
+            Operators and complex queries - instead of searching for exact values in find(), we can use greator than or less than
+                -> and many other dynamic queries,    https://www.mongodb.com/docs/manual/reference/operator/query/
+                -> operators start with $ dollar sign, and the search value must be in an object
+                Comparison operators:
+                    $gt - greator
+                    $gte - greator than or equal to
+                    $in - matches any values in a range of values or array.
+                    $lt - less than
+                    $lte - less than or equal to
+                    $ne - matches values that are not equal to this value
+                    $nin - matches none of the value specified in an array
+                Logical operators:
+                    $and - joins query clauses, returns all documents that match both conditions
+                    $not - inverts the query expression, returns documents that do not match the condition
+                    $nor - when condition fails to match both clauses, like or
+                    $or - joins query with or, returns all documents that match condition of either clause.
+                Element operator
+                    $Exists - matches documents that have a specified property, check if property exist on document
+                    $type - select document where field is certain type, like number, array, string..
+                Evaluation operator
+                    $expr - allows aggregation expressions, lets us compare nested data with other nested data https://www.mongodb.com/docs/manual/reference/operator/query/expr/#mongodb-query-op.-expr
+                    $regex - selects fields that match a pattern, where specific text is not known
+                Array operator
+                    $all - check if array contains all searched values, can be rewritten with and, & in other ways as well
+                    $elemMatch - match array field with at least one element that matches ALL the specified conditions
+                    $size - searches how many items are in an array, array length must match exactly, then returns that item.
+
+                -> $gt search where age is greator than 28
+                    db.people.find({age: {$gt: 28} }).limit(3)
+                -> $lt , 2 conditions search where age less than 30, and friends less than 100
+                    db.people.find({friends: {$lt:100}, age: {$lt:30} }).limit(2)
+                -> $or search where either condition might be true, inside the 'or' array are both conditions in an object
+                    -> friends less than 10 or age is exactly 25
+                    db.people.find({$or: [{friends: {$lt:10}}, {age: 25} ]}).limit(2)
+                -> $in search for docs if property value is in the range of values we provide, this simplifies using many 'or' operators
+                    db.collection-name.find({ rating: {$in:[7,8,9]} })
+                -> $nin search if property value is NOT in the range of values we provide
+                    db.collection-name.find({ rating: {$nin:[7,8,9]} })
+
+                Array queries -
+                    -> checks the array to see if it includes this value, genre does NOT have to be a string, it's checking the array for this exact string
+                        db.books.find({genre: "fantasy"})
+                    -> if we want to search, if a value is the ONLY value in an array. this means the array has one item, where above is searching through all items
+                        db.books.find({genre: ["fantasy"]})
+                    -> $all - search multiple values, search array if it includes multiple values
+                        db.books.find({genre: {$all: ["fantasy", "sci-fi"]}})
+                    -> $rev query nested documents, array of objects.. reviews: [{name:"luigi"},{body: "it was good"}]
+                        -> the array is using dot notation which is odd, and it must be in quotes
+                        db.books.find({"reviews.name": "luigi"})
+
+                DELETE - the best way to delete is based on _id, if we use a type of filter, we can delete things we didn't mean to possibly
+                    -> by using deleteOne, if we put in a filter condition it would only delete the first document that meets the condition
+                          db.people.deleteOne({_id: ObjectId("653a05efc64d3167e6f1a520")})
+
+                    deleteMany() - delete many documents at once that meet a condition
+                        db.people.deleteMany( {favorite_color: 'red'} )
+
+                UPDATE - update one document or many at once
+                    -> we can update plain fields or nested values like arrays, remember since we are not adding a new document, but updating it
+                    -> we have many operators, basic fields first https://www.mongodb.com/docs/manual/reference/operator/update/
+                        $set - set value of field in document, overwrites previous value completely
+                        $currentDate - set value of field to current date, either as date or timestamp
+                        $inc - increment/decrement value of field by specified amount, use negative number to subtract
+                        $min - only updates if specified value is less than existing value
+                        $max - only updates if specified value is greator than existing value
+                        $mul - multiplies value of the field by specified amount
+                        $rename - renames the field name
+                        $unset - removes specified field from a document
+
+                    Array operators:
+                        $addToSet - add elements to array if they do not already exist in the array
+                        $pop - removes first or last item of an array
+                        $pull - removes all array elements that match specific query
+                        $push - adds an item to an array
+                        $pullAll - removes all matching values from an array
+                        $each - combine items to be added/removed from array instead of just one value, like $push and $addToSet combined
+                        $position - like push, but specify position in the array to add elements
+                        $slice - limit size of updated arrays
+                        $sort - reorder documents stored in an array
+
+
+
+                    updateOne
+                    -> first argument object is search term, mostly _id for exact match, 2nd arg is object using $set: all properties to change are in here
+                        db.people.updateOne({_id: ObjectId("653a05efc64d3167e6f1a53e")},{$set: {favorite_color:'purple',friends:999}})
+
+                    updateMany() - same structure as above, first object is selection, 2nd is what to change using $set
+                        db.people.updateMany({favorite_color:'blue'}, {$set: {favorite_color:'teal'}})
+
+                    increment - if we don't know the current value like score, but know we want to add to it
+                        -> we no longer use $set, now its $inc to increment, use -2 to decrement and reduce the number
+                        db.people.updateOne({_id: ObjectId("653a05efc64d3167e6f1a53e")}, {$inc: {friends: 2}})
+
+                        -> $pull remove array elements/object with specific value
+                        db.books.updateOne({_id: ObjectId("653a05efc64d3167e6f1a53e")}, {$pull: {genres: "fantasy"}})
+                        -> push add array item with specific value
+                        db.books.updateOne({_id: ObjectId("653a05efc64d3167e6f1a53e")}, {$push: {genres: "fantasy"}})
+                        -> $each ,
+                        db.books.updateOne({_id: ObjectId("653a05efc64d3167e6f1a53e")}, {$push: {genres: {$each:["1", "2"]}}})
+
+
+
+
+
 */
+
 
 
 
