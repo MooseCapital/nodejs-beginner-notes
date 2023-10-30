@@ -398,6 +398,10 @@
             https://github.com/smirnov-am/awesome-saas-boilerplates
 
 
+        API testing - we have seen data from mongodb in an express route, but when we want to update, delete or other things that can't easily be seen
+            -> in the browser, we need an api testing service. postman was common but got a bad reputation, now we have insomnia.rest, usebruno.com and hoppscotch.io
+
+
 
 *  */
 

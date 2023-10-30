@@ -50,10 +50,89 @@
 
             we should have a SINGLE mongo client instance for all database request, because starting client instances/ connections are resource intensive.
 
-        shell - we click connect on mongodb website, and click shell, we install it on our os, then paste the shell link which ask for the password
-            -> now we can test mongodb commands without a programming language, simply learn the database language on its own first.
+            -> in our tutorial we created db.js to use a single connection function where we pass a callback , then we do not run the server if db connection failed
 
-    network errors - if we get a network error on connecting, we should check in atlas, see if our ip is on the allowed list, such as our vps
+
+            shell - we click connect on mongodb website, and click shell, we install it on our os, then paste the shell link which ask for the password
+                -> now we can test mongodb commands without a programming language, simply learn the database language on its own first.
+
+        network errors - if we get a network error on connecting, we should check in atlas, see if our ip is on the allowed list, such as our vps
+
+    Mongodb learn course - crud operations direct from mongodb, not our other courses first
+            when inserting a document, if the collection we insert on doesn't exist, mongo will create the collection for us
+            -> when searching, this will check the value, and look to see if it's inside an array
+                investment: ['bond', 'real estate', 'stock'] would be found the same as investment: 'stock'
+                db.sales.find(investment: 'stock')
+
+            What if we specifically want to search inside an array, NO string will be found, this ensures arrays only
+                db.sales.find( {items: {$elemMatch: {investment: 'stock'}}} )
+                -> multiple filters
+                db.sales.find( {items: {$elemMatch: {investment: 'stock', price: {$gt:200} }}} )
+
+            we can make a query with multiple $or statements inside $and statement to give many options.
+                db.sales.find({$and: [{$or: [a:1,b:2],},  $or:{ [a:3,b:4]}]})
+            -> we can't put multiple $or statements without the $and, because or would be the same property name in the same json, so
+                -> the 2nd $or statement would override the first, but if they are inside the $and array, they are in their own object and separated
+
+            updateOne vs replaceOne - update will update values and keep all old properties, where replace will delete old values and bring in the new
+                db.name.replaceOne({_id: ObjectId(1234)}, {replace_values: 'bob'})
+
+            update when doesn't exist - we found the upsert option, if no document matches the query, it creates one instead of failing to update
+                db.birds.updateOne({common_name: "Robin Redbreast",},{$inc: {"sightings": 1,},$set: {last_updated: new Date(),},},{upsert: true,})
+
+            findAndModify() - updates a document, then reads its new value, this is for things like a like button, we save 2 calls to the database!
+                -> normally we update -> find document, BUT the document could have been updated again before we read it again and we could have the wrong value
+                -> using findAndModify, we combine the querys to make ONE call to the database
+                -> by default the return doc does NOT include the modification made, unless we specify new: true, in the options
+                -> we can also set upsert: true, if it does not exist, we create it, then read back the result
+                     db.podcast.findAmdModify({query: {_id: ObjectId(1234)}, update: {$inc: {downloads:1}}, new:true})
+
+            Projections - see find() section, these save us bandwidth by not returning all our data every query, only get back properties we want.
+                    _id field will always show unless we specify _id:0, to not show
+                    we hide nested property names {"address.zip: 0"}
+                    inclusion and exclusion statements can't be combined, except for _id:
+
+            count documents  - db.col.find().count() is deprecated and gives approximate value, countDocuments() gives accurate count
+                    db.collectionName.countDocuments({value:$gt:100})
+
+            update - when making an update, we aren't reading anything, we get back how many things we modified, this can let us know if errors occurred
+                let db = await db.col.updateOne()
+                    if(db.modifiedcount === 1) console.log('it worked!')
+
+            transactions - we learned in postgres, these ensure all of our db actions are completed, or none of them are, such as a bank transaction
+                -> a bank transaction sending money but not withdrawing it would have monumental effects
+
+            aggregation - we get data from multiple documents to return computed results, we can group values, perform operations on grouped data to
+                    -> return a single result, analyze data changes over time
+                    -> aggregation has states, each state performs an operation on the documents, such as filter documents, group documents, calculate values..
+                    -> documents that are output are passed to the next stage https://www.mongodb.com/docs/manual/core/aggregation-pipeline/#std-label-aggregation-pipeline
+                        https://www.mongodb.com/docs/manual/reference/method/db.collection.aggregate/
+                    -> basically, filter down data from multiple documents, then group that data into a single document to easily read
+                        db.zips.aggregate([
+                        {$match: { state: "CA"}},
+                        {$group: {_id: "$city",totalZips: { $count : { } }}}])
+
+                    -> sort data by highest population, limit to get top # of results only.
+                        db.zips.aggregate([
+                        {$sort: {pop: -1}},
+                        {$limit:  5}])
+
+                    -> project specifies what field to include: 1, exlude: 0
+                        $project: {state:1, zip:1,population:"$pop",_id:0}
+
+                    -> $out -> this goes at the very end because it creates a whole new collection with our returned information that has been filtered, grouped, etc..
+                            -> if $out is set to a collection that exist, it will overwrite and delete all its data.
+
+            mongo atlas search - when our users type into our input box and want to search something in our database that is not exact, it's hard to get
+                a good algorithm to know what the user is looking for, this is what mongo atlas is for
+                -> atlas will index, autocomplete and suggest common results, search across different data types, fine tune relevance
+
+                search index - makes searches more efficient, not to be confused with the database index above, to make querys more efficient
+                dynamic mapping - all fields are indexed except booleans, timestamps, id
+
+                on mongo website -> go into database -> atlas tab -> create -> click db and collection -> visual editor -> dynmic mapping auto selected -> save changes
+
+
 
 
     shell -  inside the shell to navigate the database without a programming language without node, here are some commands
@@ -65,6 +144,7 @@
         exit - exits us out of mongosh, we must input credentials again.
         db.collection_name - input the collection name, after we have already 'use dbName' to go inside the database. this gets us inside a collection
                 -> db refers to current database we are in
+
 
         Methods - we are testing in the shell, but it translates to any language like nodejs CRUD methods
             CREATE
@@ -84,8 +164,9 @@
                     db.collection-name.find({name:'bill'}) -> gives all documents where name is bill exactly, so it filters. we can add multiple properties to filter by
                         db.collection-name.find({name:'bill', age:30})
 
-                    -> only return specific properties,simply pass in a second object , not everything, we always get id back with it
-                        -> see instead of in the same object, it's a separate one inside the parenthesis, and value:1 to give one property
+                    -> Projections - only return specific data properties,simply pass in a second object with what we want returned, we always get id back with it
+                        -> we set value:1 to give one property shown, this will only show this property, we must specify what else
+                            -> if we set value:0, it shows everything else and removes this property from results
                         db.collection-name.find({name:'bill'}, {shirt_size:1,fav_color:1})
 
                     -> NO filter, get every document back, but now only properties we want with it
@@ -98,7 +179,7 @@
                 db.people.findOne({gender:'Male'}) -> simply gives first user in collection that is Male, not very specific or useful..
 
 
-            sort & method chaining -
+            sort & method chaining - cursors are what is returned froma query, like db.coll.find() -> now we add cursors -> sort()/limit() to them
                 we can add methods on to find, like in sql. we can count the number of results from query
                 count -
                     db.collection-name.find().count() -> returns count of all documents in collection
@@ -210,6 +291,77 @@
                         db.books.updateOne({_id: ObjectId("653a05efc64d3167e6f1a53e")}, {$push: {genres: "fantasy"}})
                         -> $each ,
                         db.books.updateOne({_id: ObjectId("653a05efc64d3167e6f1a53e")}, {$push: {genres: {$each:["1", "2"]}}})
+
+
+                Index - when making a query we search by our property we want, that's not default _id
+                    to search, mongodb will look at every document and see if our search matches. With an index it only
+                    looks at what index matches the search then gets the result much faster. from sql we remember
+                    we should only index what we will be searching by often, because this comes at a cost of more storage to make the index
+
+                    indexes can be single and compound type, which means either one or more properties
+
+                    -> in mongodb shell, this shows us executionStats, which tells us 'nReturned' is the amount of documents returned from search
+                        -> totalDocsExamined, is the total amount we looked through, this will be the whole collection with no index.. oof
+                        db.collection-name.find({propertyName: value}).explain('executionStatus')
+
+                    create index: creates for certain property that we will constantly search by, to save time. 1 means ascending order, -1 means descending
+                            -> we do NOT specify values, we index all values of the property we specify to speed up any filter on that property
+                        db.collection-name.createIndex({propertyName: 1})
+                        -> we can set {unique:true} which means, if we insert or update a document, and its property like email, is NOT unique,
+                            -> it won't let us insert that value because it forces uniqueness on us.
+                        db.collection-name.createIndex({propertyName: 1}, {unique:true})
+                    search indexes -
+                        db.collection-name.getIndexes() -> shows all indexes, _id is default
+                    hide index - before deleting we can see the performance impact of not having the index in the future
+                    dib.col.hideIndex()
+                    delete index -
+                        db.collection-name.dropIndex({propertyName: 1})
+
+
+                    check if index is used on a query - with explain, add it before our query's, winning plan.stage will show 'collscan' if no index, IXscan means index
+                        db.customers.explain().find()
+
+                    multikey index - for array field properties to make it faster to search arrays, single array per index
+
+                    compound indexes - when we search by multiple properties then do other things like sort, our first property might be indexed
+                        -> but we still have to search by the other ones that aren't, so we combine them in an index if we search it often!
+                        db.customers.createIndex({
+                          active:1,
+                          birthdate:-1,
+                          name:1
+                        })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
